@@ -1,99 +1,102 @@
-# The Loop · Web institucional (prototipo)
+# QuéEstudio · Test vocacional argentino
 
-Prototipo de demostración para **The Loop**, importadora y distribuidora argentina
-de accesorios de moda, indumentaria y perfumería. Estética tech premium, oscura
-con acento violeta neón, escena 3D interactiva en el Hero y captación de leads.
+Quiz rápido de **10 preguntas** que, según los gustos de la persona, le sugiere
+qué carrera universitaria estudiar y en qué facultades argentinas hacerlo.
 
-> ⚠️ Es una **demo**: el contenido es de muestra (mock) y el formulario no envía
-> a ningún backend todavía. Está preparado para sumar carrito y datos reales.
+Producto **lúdico y orientativo** (no es orientación vocacional profesional),
+pensado para tráfico viral desde **TikTok** + **SEO** en Google, y monetizado con
+**Google AdSense**. La prioridad #1 del diseño es que el resultado dé ganas de
+compartirlo: una **placa** descargable, limpia y coleccionable por área.
 
 ## 🧱 Stack
 
 - **Next.js 14** (App Router) + **TypeScript**
-- **Tailwind CSS** (paleta vía variables CSS)
-- **React Three Fiber** + **@react-three/drei** (escena 3D del Hero)
-- **Framer Motion** (animaciones de UI)
-- **GSAP + ScrollTrigger** + **Lenis** (smooth scroll y animaciones al scroll)
+- **Tailwind CSS** (identidad "sticker": base crema, tinta casi negra, violeta de marca)
+- **Framer Motion** (transiciones del quiz y reveal del resultado)
+- **html-to-image** (descarga de la placa como PNG)
+- **next/og** (`@vercel/og`) para la **OG image dinámica** por resultado
+- Sin base de datos: toda la data (preguntas, carreras, universidades) es local
+- Mobile-first, listo para **Vercel**
 
 ## 🚀 Correr en local
 
 Requisitos: **Node 18.17+** (recomendado Node 20/22).
 
 ```bash
-# 1. Instalar dependencias
 npm install
-
-# 2. Levantar el entorno de desarrollo
-npm run dev
+npm run dev      # http://localhost:3000
 ```
 
-Abrí **http://localhost:3000** en el navegador.
+Otros comandos: `npm run build`, `npm run start`, `npm run lint`.
 
-Otros comandos:
+## 🗺️ Rutas
 
-```bash
-npm run build   # build de producción
-npm run start   # servir el build de producción
-npm run lint    # linter
-```
+| Ruta | Qué es |
+| --- | --- |
+| `/` | Landing con gancho + botón "Empezar test" |
+| `/test` | El quiz (una pregunta por pantalla, barra de progreso) |
+| `/resultado/[area]` | Resultado por área (`tec`, `neg`, `sal`, `soc`, `der`, `art`). Funciona por URL directa y genera su propia OG image |
+| `/carreras` | Índice de todas las carreras |
+| `/carreras/[slug]` | Página SEO por carrera (de qué se trata, dónde estudiar, salida laboral) |
+| `/sobre` | Sobre el test (ayuda a la aprobación de AdSense) |
+| `/privacidad` | Política de privacidad (requisito de AdSense) |
 
-## ☁️ Deploy en Vercel (para compartir el link)
+`sitemap.xml` y `robots.txt` se generan automáticamente (`app/sitemap.ts`, `app/robots.ts`).
 
-La forma más rápida de mostrárselo a tus socios con un link público:
+## 🎛️ Cómo ajustar el test
 
-1. Subí el proyecto a un repo de GitHub (este ya lo está).
-2. Entrá a **https://vercel.com**, "Add New… → Project" e importá el repo.
-3. Vercel detecta Next.js solo: dejá todo por defecto y "Deploy".
-4. En 1–2 minutos te da una URL tipo `https://the-loop.vercel.app`.
+- **Preguntas y puntajes** → `data/quiz.ts`. Cada opción suma puntos a una o dos
+  áreas (`AREA +N`).
+- **Motor de puntaje (para tunear pesos y desempate)** → `lib/scoring.ts`.
+  - `AREA_WEIGHTS`: multiplicador por área para balancear el test.
+  - `TIEBREAK_ORDER`: orden de desempate. Hoy: `SAL > DER > TEC > NEG > SOC > ART`.
+- **Resultados / placa** (título, frase, carreras, universidades, colores) →
+  `data/areas.ts`.
+- **Contenido SEO de carreras** → `data/carreras.ts`.
+- **Marca, dominio y AdSense** → `data/site.ts`.
 
-No hace falta configurar variables de entorno para la demo.
+## 💰 Google AdSense
 
-> Alternativa por CLI: `npm i -g vercel && vercel` (seguí los pasos).
+1. Completá `adsensePublisherId` en **`data/site.ts`** con tu ID
+   (`ca-pub-XXXXXXXXXXXXXXXX`). Mientras esté vacío, **no** se carga el script ni
+   se muestran anuncios (en su lugar se ve un placeholder gris).
+2. Completá los `adSlots` (`resultado`, `carrera`) con los IDs de slot que creás
+   en tu panel de AdSense.
+3. Los ads son discretos y **nunca** aparecen dentro del quiz (arruina el
+   compartido). Van debajo de la placa y en las páginas de carrera.
+4. El sitio ya incluye `/privacidad`, `/sobre` y un banner de consentimiento de
+   cookies, requisitos para la aprobación de AdSense.
+
+## 🔗 Antes de publicar
+
+- Cambiá `url` y `brand` en `data/site.ts` por tu dominio real (hoy
+  `queestudio.ar`). De ahí salen la metadata, las OG images, el sitemap y los
+  links compartidos.
+- Verificá que la oferta de carreras por universidad siga vigente (los planes
+  cambian). El disclaimer ya lo aclara, pero conviene chequear.
+
+## ☁️ Deploy en Vercel
+
+1. Subí el repo a GitHub.
+2. En **vercel.com** → "Add New… → Project" e importá el repo.
+3. Vercel detecta Next.js solo: "Deploy". No hacen falta variables de entorno.
 
 ## 📁 Estructura
 
 ```
-app/                  Layout raíz, página home y estilos globales
+app/
+  page.tsx                     Landing
+  test/                        Quiz
+  resultado/[area]/            Resultado + opengraph-image dinámica
+  carreras/, carreras/[slug]/  Índice y páginas SEO de carreras
+  sobre/, privacidad/          Páginas legales / de contenido
+  sitemap.ts, robots.ts        SEO técnico
 components/
-  layout/             Navbar y Footer
-  sections/           Una por sección (Hero, About, Categories, …)
-  three/              Escena 3D (HeroScene + DistortBlob)
-  ui/                 Reutilizables (cards, botones, headings, reveal)
-providers/            SmoothScrollProvider (Lenis + GSAP)
-hooks/                useMediaQuery, usePrefersReducedMotion
-data/                 Mock data: products, categories, brands, site
-lib/                  Helpers (cn, formato ARS)
-public/               Assets estáticos (placeholders)
+  quiz/        Quiz (client, Framer Motion)
+  result/      ResultCard (la placa), ShareButtons, ResultView
+  ads/         AdSense (script) + AdSlot
+  layout/      Header, Footer, CookieBanner
+  ui/          AreaIcon
+data/          quiz, areas, carreras, site
+lib/           scoring (tunable), utils
 ```
-
-## ✏️ Qué reemplazar con contenido real
-
-Buscá los comentarios `TODO:` en el código. Los puntos clave:
-
-- **`data/site.ts`** → email, teléfono, WhatsApp, redes sociales, ubicación.
-- **`data/products.ts`** → catálogo real (nombre, marca, categoría, precio, foto).
-- **`data/categories.ts`** y **`data/brands.ts`** → categorías y logos de marcas.
-- **Imágenes**: hoy las cards usan placeholders con gradiente. Subí las fotos a
-  `public/productos/` y `public/categorias/` y cambiá los `<div>` placeholder por
-  `<Image />` de `next/image` (marcado con `TODO`).
-- **Logo**: en `Navbar.tsx` y `Footer.tsx` hay un logo tipográfico provisorio.
-
-## 🎨 Personalizar la identidad
-
-Toda la paleta vive como variables CSS en **`app/globals.css`** (`:root`):
-`--bg`, `--surface`, `--text`, `--accent`, etc. Cambiando esos hex se recalibra
-toda la web. Fuentes y sombras (glow) se configuran en `tailwind.config.ts`.
-
-## ♿ Performance y accesibilidad
-
-- La escena 3D **lazy-loadea** (no entra al bundle inicial), **se pausa** cuando
-  el Hero sale de la pantalla y **degrada en mobile** (geometría liviana, sin
-  partículas).
-- Se respeta **`prefers-reduced-motion`**: sin 3D animado ni smooth scroll para
-  quienes lo configuran.
-
-## 🛒 Preparado para crecer
-
-El modelo de datos (`Product` con `id`, `slug`, `price`, `inStock`) y la
-arquitectura de componentes ya están pensados para sumar un carrito/checkout
-más adelante sin rehacer la UI.

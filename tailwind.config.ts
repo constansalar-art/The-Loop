@@ -1,57 +1,56 @@
 import type { Config } from "tailwindcss";
 
 /**
- * Configuración de Tailwind para The Loop.
- * La paleta vive como variables CSS en globals.css; acá las exponemos
- * a Tailwind para poder usar clases tipo `bg-bg`, `text-accent`, etc.
+ * Tailwind — QuéEstudio.
+ * Identidad: base clara "papel", tinta casi negra y un violeta de marca
+ * bien saturado. Cada área del test trae su propio color (ver data/areas.ts),
+ * así que acá solo vive la identidad global del sitio.
  */
 const config: Config = {
   content: [
     "./app/**/*.{ts,tsx}",
     "./components/**/*.{ts,tsx}",
-    "./providers/**/*.{ts,tsx}",
+    "./data/**/*.{ts,tsx}",
   ],
+  // Los colores por área se generan dinámicamente (bg-[var(--area)]),
+  // por eso safelisteamos algunas utilidades que Tailwind no ve en el markup.
+  safelist: [],
   theme: {
     extend: {
       colors: {
-        // Mapeamos las variables CSS para usarlas como utilidades de Tailwind.
-        bg: "var(--bg)",
-        surface: "var(--surface)",
-        "surface-2": "var(--surface-2)",
-        border: "var(--border)",
-        text: "var(--text)",
-        muted: "var(--muted)",
-        accent: "var(--accent)",
-        "accent-2": "var(--accent-2)",
-        "accent-soft": "var(--accent-soft)",
+        paper: "#FBF7F0", // fondo crema
+        ink: "#141019", // tinta casi negra con tinte violeta
+        "ink-soft": "#4b4453",
+        brand: {
+          DEFAULT: "#6D28D9", // violeta marca
+          bright: "#8B5CF6",
+          soft: "#EDE7FF",
+        },
+        pop: "#FF3D77", // rosa acento para energía
       },
       fontFamily: {
-        // Inyectadas vía next/font en el layout raíz.
         display: ["var(--font-display)", "system-ui", "sans-serif"],
         sans: ["var(--font-body)", "system-ui", "sans-serif"],
       },
       boxShadow: {
-        // Glow violeta reutilizable para botones, cards y acentos.
-        glow: "0 0 40px -8px rgba(139, 92, 246, 0.55)",
-        "glow-sm": "0 0 24px -6px rgba(139, 92, 246, 0.45)",
-        "glow-lg": "0 0 80px -10px rgba(168, 85, 247, 0.6)",
+        card: "0 2px 0 0 #141019",
+        "card-lg": "0 6px 0 0 #141019",
+        pop: "6px 6px 0 0 #141019",
       },
-      backgroundImage: {
-        "grid-faint":
-          "linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px)",
+      borderRadius: {
+        "4xl": "2rem",
       },
       keyframes: {
         "fade-up": {
-          "0%": { opacity: "0", transform: "translateY(20px)" },
+          "0%": { opacity: "0", transform: "translateY(16px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
         float: {
           "0%, 100%": { transform: "translateY(0)" },
-          "50%": { transform: "translateY(-12px)" },
+          "50%": { transform: "translateY(-10px)" },
         },
-        "pulse-glow": {
-          "0%, 100%": { opacity: "0.5" },
-          "50%": { opacity: "1" },
+        "spin-slow": {
+          to: { transform: "rotate(360deg)" },
         },
         marquee: {
           "0%": { transform: "translateX(0)" },
@@ -59,10 +58,10 @@ const config: Config = {
         },
       },
       animation: {
-        "fade-up": "fade-up 0.7s ease-out forwards",
+        "fade-up": "fade-up 0.5s ease-out forwards",
         float: "float 6s ease-in-out infinite",
-        "pulse-glow": "pulse-glow 4s ease-in-out infinite",
-        marquee: "marquee 30s linear infinite",
+        "spin-slow": "spin-slow 18s linear infinite",
+        marquee: "marquee 24s linear infinite",
       },
     },
   },

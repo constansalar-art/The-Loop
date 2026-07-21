@@ -1,40 +1,34 @@
 /**
- * Configuración central del sitio: datos de contacto, redes y navegación.
- * Centralizar esto te permite cambiar el teléfono, mail o links de redes
- * en un solo lugar. Reemplazá los placeholders por los datos reales.
+ * Configuración global del sitio.
+ * Cambiá acá el dominio, la marca y el publisher de AdSense.
  */
-
 export const site = {
-  name: "The Loop",
-  // Frase de marca para metadata / footer
+  name: "QuéEstudio",
+  // Nombre corto para la marca de agua de la placa.
+  brand: "queestudio.ar",
+  // URL de producción. Se usa para metadata, OG, sitemap y links compartidos.
+  // Reemplazá por tu dominio real antes de publicar.
+  url: "https://queestudio.ar",
+  tagline: "El test vocacional que te dice qué carrera estudiar",
   description:
-    "Importadora y distribuidora en Argentina de accesorios de moda, indumentaria y perfumería premium.",
-  // TODO: reemplazar por datos reales de contacto
-  email: "hola@theloop.com.ar",
-  phoneDisplay: "+54 9 11 5555-1234",
-  // Número en formato internacional sin signos para el link de WhatsApp
-  whatsapp: "5491155551234",
-  whatsappMessage:
-    "¡Hola The Loop! Me interesa conocer más sobre el catálogo y trabajar como revendedor.",
-  city: "Buenos Aires, Argentina",
-  // Redes sociales (reemplazá las URLs por las reales)
-  socials: {
-    instagram: "https://instagram.com/",
-    tiktok: "https://tiktok.com/",
-    linkedin: "https://linkedin.com/",
+    "Test vocacional argentino: 10 preguntas rápidas para descubrir qué carrera universitaria estudiar y en qué facultades de Argentina hacerlo. Gratis y en 2 minutos.",
+  locale: "es_AR",
+  themeColor: "#6D28D9",
+
+  // === Google AdSense ===
+  // Pegá acá tu Publisher ID (formato ca-pub-XXXXXXXXXXXXXXXX).
+  // Mientras esté vacío, no se carga el script ni se muestran ads.
+  adsensePublisherId: "", // p.ej. "ca-pub-1234567890123456"
+  // IDs de slot por ubicación (los creás en tu panel de AdSense).
+  adSlots: {
+    resultado: "", // p.ej. "1234567890"
+    carrera: "",
   },
-};
 
-/** Items del menú de navegación (anclas a las secciones de la home). */
-export const navLinks = [
-  { href: "#nosotros", label: "Nosotros" },
-  { href: "#categorias", label: "Categorías" },
-  { href: "#catalogo", label: "Catálogo" },
-  { href: "#revendedores", label: "Revendedores" },
-  { href: "#contacto", label: "Contacto" },
-];
+  social: {
+    tiktok: "@queestudio",
+    instagram: "@queestudio.ar",
+  },
+} as const;
 
-/** Link de WhatsApp listo para usar (con mensaje pre-cargado). */
-export const whatsappUrl = `https://wa.me/${site.whatsapp}?text=${encodeURIComponent(
-  site.whatsappMessage,
-)}`;
+export type Site = typeof site;
