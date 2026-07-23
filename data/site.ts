@@ -18,7 +18,7 @@ export const site = {
   // === Google AdSense ===
   // Pegá acá tu Publisher ID (formato ca-pub-XXXXXXXXXXXXXXXX).
   // Mientras esté vacío, no se carga el script ni se muestran ads.
-  adsensePublisherId: "", // p.ej. "ca-pub-1234567890123456"
+  adsensePublisherId: "ca-pub-2648611140272258",
   // IDs de slot por ubicación (los creás en tu panel de AdSense).
   adSlots: {
     resultado: "", // p.ej. "1234567890"
