@@ -8,7 +8,7 @@ export const site = {
   brand: "queestudio.ar",
   // URL de producción. Se usa para metadata, OG, sitemap y links compartidos.
   // Reemplazá por tu dominio real antes de publicar.
-  url: "https://queestudio.ar",
+  url: "https://the-loop-ig04sogac-renovamarket.vercel.app/",
   tagline: "El test vocacional que te dice qué carrera estudiar",
   description:
     "Test vocacional argentino: 10 preguntas rápidas para descubrir qué carrera universitaria estudiar y en qué facultades de Argentina hacerlo. Gratis y en 2 minutos.",
