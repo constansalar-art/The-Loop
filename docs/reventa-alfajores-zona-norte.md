@@ -372,6 +372,104 @@ pura y pasa a ser elaboración. Verificar antes, no después.
 
 ---
 
+## 7 ter. El canal: barrios privados, flyer en grupos, entrega a pedido
+
+Este es el primer elemento del proyecto con una ventaja estructural real, y
+cambia el análisis anterior. Pero las dos mitades del plan no valen lo mismo.
+
+### Por qué el flyer + entrega a pedido sí ataca el problema
+
+El argumento "el cliente compara en Mercado Libre" pierde fuerza acá, por dos
+motivos concretos:
+
+- **El cliente no está comparando, porque no estaba comprando.** Nadie entra a
+  Mercado Libre a buscar pasta de maní un martes. La demanda la generás vos con
+  el flyer. Un producto que aparece delante de alguien que no lo estaba buscando
+  no se compara: se compra o no se compra.
+- **La entrega dentro del barrio es valor real que Mercado Libre no da.** Mismo
+  día, sin mínimo de compra para el envío gratis, sin esperar tres días, sin
+  que quede el paquete en la guardia. Eso justifica un sobreprecio genuino.
+
+### Pero la comparabilidad no desaparece: se pospone
+
+Con una marca conocida, el cliente que compra una vez y queda conforme
+eventualmente la busca online. Ahí ve el precio y el envío gratis. **La primera
+venta la hacés; la recompra la perdés.**
+
+De ahí sale la regla que ordena todo lo anterior:
+
+> **Un canal propio pide un producto que no se pueda comparar.** Con producto
+> comparable, el canal sirve una sola vez por cliente. Con producto no
+> comparable, el canal es lo único que hay y la recompra vuelve a vos.
+
+Canal propio y marca conocida son la peor combinación posible: el canal te
+consigue la primera venta, y la marca conocida te saca la segunda.
+
+### Puerta a puerta: no
+
+Por dos razones independientes.
+
+**Acceso.** Nordelta tiene 8 puntos de acceso controlado y las categorías de
+ingreso están reguladas y registradas: servicio doméstico desde las 6, personal
+de obra desde las 8, cada uno identificado. No encontré publicado el texto que
+prohíba expresamente la venta domiciliaria —los reglamentos internos de cada
+barrio no están online— pero la estructura de accesos implica que **cada entrada
+la tiene que autorizar un residente**. No es algo que se pueda hacer a escala:
+no se entra a recorrer manzanas.
+
+**Economía.** Con una ganancia del orden de $2.500 por kilo, y suponiendo una
+conversión optimista del 10%, 100 puertas dan 10 ventas: $25.000 brutos por un
+día entero de trabajo. No paga el día.
+
+El flyer en los grupos no tiene ninguno de los dos problemas: costo marginal
+cero por contacto, entregas agrupadas en una sola entrada al barrio.
+
+### El reencuadre: el canal es el activo, no el producto
+
+Si el canal funciona, lo valioso no es la mercadería. Es **la lista**: 150 a 200
+hogares de Nordelta que te compran por WhatsApp. Eso sobrevive a cualquier
+cambio de producto, no se vence y no le baja el precio la campaña de maní.
+
+Eso cambia adónde va el millón. **No va a stock: va a construir la lista.** El
+stock se compra contra pedidos ya tomados.
+
+Y convierte la preventa de la sección 4 de test en **modelo operativo
+permanente**:
+
+> Pedidos de lunes a jueves en el grupo · compra el viernes · entrega el sábado.
+
+Con ese ciclo: capital de trabajo cercano a cero, riesgo de vencimiento cero,
+riesgo de caída de precio del maní cero, y se pueden probar productos nuevos sin
+comprar un solo kilo por adelantado. Es estrictamente mejor que comprar stock y
+salir a colocarlo.
+
+### Y entonces el producto correcto es otro
+
+Con lista propia y entrega no se vende un SKU: se vende un **pedido recurrente
+de varios ítems**. Ahí el ticket sube y el margen se mezcla:
+
+- Unos pocos **productos conocidos** (Mani King entre ellos) como gancho y
+  motivo de frecuencia. Margen bajo, casi sin ganancia. Sirven para que el
+  cliente abra el mensaje.
+- El grueso del margen en **productos que el cliente no puede comparar** —los
+  que buscaba la sección 0, ahora con un canal para colocarlos.
+
+Mani King funciona como producto ancla. No como el negocio.
+
+### A verificar antes de arrancar
+
+1. **Reglas de los grupos.** Muchos grupos de barrio prohíben venta en el grupo
+   principal y derivan a uno de clasificados o compraventa. Publicar en el
+   equivocado es que te saquen. Averiguar cuál es cuál antes de postear.
+2. **Acceso para entregar.** Entrega agrupada en un punto y horario acordado es
+   más viable que entrar casa por casa. Confirmar con un vecino cómo se maneja.
+3. **Habilitaciones.** Tigre tiene un trámite específico de *Habilitación para
+   Promoción de Productos en la vía pública*, además de la habilitación
+   comercial para venta de alimentos. Confirmar en el municipio cuál aplica a
+   venta con entrega sin local.
+
+---
+
 ## 8. Criterios de corte
 
 Definidos ahora, en frío, para no negociarlos después:
