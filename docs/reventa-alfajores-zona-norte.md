@@ -330,6 +330,46 @@ Nótese que el benchmark **no** es el precio de góndola del supermercado, sino 
 listado más barato de Mercado Libre puesto en la puerta. Ese es el precio que el
 cliente de Nordelta realmente puede conseguir.
 
+### Caso concreto: Mani King
+
+Es el caso más difícil de la categoría, por tres razones que se suman:
+
+**1. Ya tiene distribuidores oficiales que venden online al público.**
+AlPuntoDeVenta se presenta como distribuidora oficial para toda la Argentina;
+Zucchi y Lunic también distribuyen la marca. Todos con tienda online. El
+producto está además en La Anónima, en dietéticas y en Mercado Libre con envío
+gratis. La marca tiene sitio propio (maniking.com.ar) y hasta exporta. **Hueco
+territorial: cero.**
+
+**2. El distribuidor oficial es, al mismo tiempo, competidor.** Vende al mismo
+cliente final, por internet, y compra más barato que un revendedor que le compra
+a él. Si el "buen precio" viene de uno de estos distribuidores, la posición es
+la de cuarto eslabón de la cadena compitiendo contra el tercero.
+
+**3. Está en el extremo barato de la categoría.** Del spread 5x de la pasta de
+maní, Mani King está abajo. El margen porcentual se aplica sobre una base
+chica, así que el margen en pesos por kilo es reducido.
+
+**Anclas de precio minorista de Mani King 1 kg (agosto 2026, sin verificar):**
+entre **$4.300 y $6.990**, según el vendedor. Tomando **$5.000** como precio de
+calle conservador, el costo de compra necesario es:
+
+| Objetivo | Costo máximo por kilo | Con $1.000.000 se compran |
+| --- | --- | --- |
+| x2 (objetivo del proyecto) | **$2.500** | 400 kg |
+| x1,5 | $3.333 | 300 kg |
+| +30% | $3.850 | 260 kg |
+
+La prueba de la sección anterior aplicada acá: el costo hay que compararlo
+contra **el listado más barato de Mercado Libre con envío gratis a Nordelta**,
+no contra la góndola. Si no se puede vender por debajo de ese número y ganar,
+no hay negocio, porque el cliente lo tiene a un clic.
+
+**Nota regulatoria.** Si aparece la idea de comprar el formato granel de 5 kg y
+fraccionar a 1 kg para ampliar el margen: fraccionar alimento para reventa
+requiere habilitación bromatológica y registro (RNPA/RNE). Deja de ser reventa
+pura y pasa a ser elaboración. Verificar antes, no después.
+
 ---
 
 ## 8. Criterios de corte
