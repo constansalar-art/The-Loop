@@ -1,7 +1,83 @@
 # Reventa de consumibles — Zona Norte GBA
 
-Estado: evaluación previa a la compra. Todos los precios son estimativos y hay
-que verificarlos cotizando.
+Estado: **Capitán del Espacio descartado.** Ver sección 0. El resto del
+documento se conserva porque el método sigue sirviendo para el próximo producto.
+
+---
+
+## 0. Resultado de la verificación — el producto no pasa
+
+La hipótesis era: *producto de culto que se vende en el conurbano sur y no llega
+a Zona Norte*. De las tres patas, dos se caen al verificar.
+
+**Es producto de culto: confirmado.** Fabricado desde 1962, hoy en Quilmes.
+Sin publicidad, sin cartel, el dueño no daba entrevistas. Cobertura en La Nación,
+Infobae, Cronista e Infocielo, entrada propia en Wikipedia. La demanda existe y
+es real.
+
+**"No llega a Zona Norte": falso.** Está disponible online y entregado a
+domicilio, hoy:
+
+| Canal | Qué ofrece |
+| --- | --- |
+| Mercado Libre | Caja x36 de varios vendedores, **con envío gratis**, llega a cualquier dirección |
+| Rappi | Listado con página de producto propia — opera en Tigre y Nordelta |
+| Golosinerías online | El Palacio, Kako, Don Yaco, entre otras, con venta por unidad y por pack |
+| Mayoristas online | Golosinas del Sur, Distribuidor MM, XPallet, Ciudad Cotillón, Golosinas al por Mayor |
+
+El faltante es de **kioscos físicos**, no de disponibilidad. Y el cliente que se
+había definido —clase alta de Nordelta— es exactamente el que compra por Mercado
+Libre y pide por Rappi sin pensarlo. El hueco existe justo donde ese cliente no
+compra.
+
+Esto falla el criterio que el propio documento fijó en la sección 5: la ventaja
+tenía que ser *"no hay distribución **ni online conveniente**"*. Hay online
+conveniente.
+
+**"El cliente no puede comparar el precio": falso.** El precio minorista está
+publicado en Mercado Libre. El precio **mayorista también** — hay listados
+explícitos de "distribuidor mayorista y minorista" en la misma plataforma donde
+compra el cliente. Cualquiera puede ver a cuánto se compra la caja. Por el
+criterio central del proyecto, eso empuja el margen a la franja de 10–35%,
+la misma que hizo descartar la Coca-Cola.
+
+**Riesgo adicional de abastecimiento.** La nota de Cronista lo resume en el
+título: *produce poco y vende todo*. La escasez es una decisión de la fábrica,
+no una falla de logística. Un negocio que necesita reponer $1.000.000 en
+mercadería no se apoya en un proveedor que deliberadamente produce poco.
+
+### Sobre los precios: no los pude confirmar
+
+Los sitios de Mercado Libre y de los proveedores están bloqueados desde este
+entorno, así que solo tengo fragmentos de buscador, y **se contradicen entre sí**:
+
+| Fuente | Precio | Por unidad |
+| --- | --- | --- |
+| Kiosco (nota de precios, ago-2026) | $1.100 la unidad | $1.100 |
+| Don Yaco (minorista online) | $1.700 la unidad | $1.700 |
+| Golosinas del Sur — caja x36 | $47.829 | $1.329 |
+| Ciudad Cotillón — caja x36 | $16.853 | $468 |
+| Golosinas al por Mayor — caja x36 | $12.000 | $333 |
+
+Un mayorista a $1.329 por unidad contra un kiosco a $1.100 es imposible: alguno
+de esos números está viejo. Con la inflación, cualquier precio indexado por un
+buscador puede tener meses o años. **No sirven para decidir y no armé la tabla de
+rentabilidad con ellos.** Si se quisiera avanzar igual, el precio hay que pedirlo
+por teléfono el mismo día de la compra.
+
+Pero el precio ya no es lo que decide. La distribución sí, y esa está resuelta
+por Mercado Libre y Rappi.
+
+### El filtro que queda para el próximo producto
+
+De todo esto sale una prueba de dos minutos, gratis, que hay que correr **antes**
+de cualquier otra cosa sobre cada candidato:
+
+> Buscarlo en **Mercado Libre** y en **Rappi**.
+> Si aparece con envío a Nordelta, no hay negocio. Siguiente producto.
+
+Lo que se busca es un producto con **demanda que ya existe** y que **no esté en
+Mercado Libre ni en Rappi**. Esa segunda condición es rara y es la que vale.
 
 ---
 
