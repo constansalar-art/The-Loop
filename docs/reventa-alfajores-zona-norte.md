@@ -470,6 +470,83 @@ Mani King funciona como producto ancla. No como el negocio.
 
 ---
 
+## 7 quater. Cadenas para la nieve
+
+Producto distinto en naturaleza: no es consumible y no se recompra (duran años).
+El proyecto ya había descartado las parrillas por esto mismo. La diferencia a
+favor: acá la mayoría **no** tiene, y en algunos pasos son obligatorias.
+
+### El calendario, que es lo que decide
+
+Al 4 de agosto de 2026:
+
+| Hito | Fecha |
+| --- | --- |
+| Pico de demanda (vacaciones de invierno) | **Ya pasó** — julio |
+| Cierre Las Leñas | 20 de septiembre |
+| Cierre Cerro Catedral | 30 de septiembre |
+| **Ventana restante** | **~7 semanas** |
+
+Y la temporada 2026 viene mala: Las Leñas abrió el 11 de julio cuando había
+estimado entre el 20 y el 21 de junio, en medio de lo que la prensa llamó una
+crisis por falta de nieve. Todos los centros abrieron parcialmente y con nieve
+artificial.
+
+**Eso último importa más que el cierre.** La demanda de cadenas no la genera que
+haya temporada de esquí: la genera que haya **nieve en la ruta**. Una temporada
+que se sostiene con nieve artificial en las pistas es una temporada con los
+caminos despejados. El driver de demanda está débil justo este año.
+
+### Lo que el producto sí arregla
+
+- **El ticket.** Es de otro orden que la pasta de maní. El problema de la
+  sección 2 —margen bueno sobre un producto demasiado barato— desaparece. Con
+  el canal de la sección anterior, este ticket sí paga el viaje de entrega.
+- **No se vence.** Lo que no se vende se guarda hasta junio. La pérdida es
+  capital inmovilizado, no mercadería tirada.
+- **Hay obligatoriedad** en algunos pasos y rutas de montaña. Es demanda forzada,
+  no de preferencia — algo que ningún producto anterior tenía.
+- **La urgencia juega a favor del canal.** "Salgo a Bariloche el viernes" es una
+  compra con fecha. Ahí la entrega en el barrio al día siguiente vale de verdad,
+  más que en un producto de almacén.
+
+### Lo que no arregla
+
+- **Es comparable, y mucho.** Está todo en Mercado Libre, con marcas armadas
+  —Dakota (más de 1000 vendidos), Michelin, Iael, Vexo, R1 Sport—. Precio
+  público.
+- **No hay recompra.** Se compra una vez y dura años. Sirve para **conseguir** al
+  cliente, no para retenerlo. Su valor real es que ese hogar queda en la lista.
+- **Talles.** Cada cadena corresponde a una medida de cubierta (225/70-15,
+  265/65/17, 265/70/16...). Comprar stock significa apostar a qué medidas se van
+  a vender. Elegir mal no deja stock: deja **stock muerto de una medida que nadie
+  pide**, y encima fuera de temporada.
+
+### Veredicto
+
+**Comprar stock ahora: no.** Es el peor momento del año para hacerlo — final de
+una temporada floja, siete semanas de ventana, y después nueve meses de capital
+quieto apostado a medidas elegidas a ciegas.
+
+**Venderlas en estas siete semanas contra pedido: sí, y conviene.** El modelo de
+la sección anterior encaja acá mejor que en cualquier producto evaluado hasta
+ahora:
+
+> Flyer en el grupo → el vecino avisa que viaja y pasa la medida de cubierta →
+> se compra esa medida → se entrega.
+
+Resuelve los tres problemas de una sola vez: sin riesgo de temporada, sin riesgo
+de talle, sin capital inmovilizado. Y lo que se está probando en realidad no es
+el producto: **es el canal**, gratis y con un producto de ticket alto.
+
+**La oportunidad real es la temporada que viene, y se prepara en mayo, no en
+agosto.** Para un producto estacional, la compra de stock se hace antes de que
+arranque la demanda, no cuando se está terminando. Si el acceso a buen precio se
+sostiene, la jugada es entrar en mayo/junio de 2027 con la lista de clientes ya
+construida durante el año vendiendo otra cosa.
+
+---
+
 ## 8. Criterios de corte
 
 Definidos ahora, en frío, para no negociarlos después:
