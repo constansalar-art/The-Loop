@@ -522,6 +522,48 @@ caminos despejados. El driver de demanda está débil justo este año.
   a vender. Elegir mal no deja stock: deja **stock muerto de una medida que nadie
   pide**, y encima fuera de temporada.
 
+### Precios de referencia (agosto 2026)
+
+Fragmentos de buscador, sin poder abrir Mercado Libre desde este entorno. Sirven
+como orden de magnitud, no como cotización.
+
+| Segmento | Juego completo |
+| --- | --- |
+| **Auto**, rodado 13–17, cadena 12 mm | **$32.500 – $57.100** |
+| **Camioneta / SUV**, rodado 16–22, cadena 16 mm | **$45.300 – $119.200** |
+
+Referencias puntuales: La Casa del Renault, juego 12 mm rodado 13–17 a $36.120 ·
+Warnes Market, 12 mm homologadas con guantes a $57.118 · Iael 255/70-16 a
+$75.973, y un modelo de camioneta a $119.210 · Dakota entre $22.794 y $76.168
+según medida.
+
+**Dos lecturas del dato, y la segunda es la que importa:**
+
+**1. El público apunta al extremo caro.** Nordelta maneja camioneta, no auto
+chico. El segmento relevante es el de $45.000 a $119.000 el juego, no el de
+$32.000. Con un margen de apenas 50% sobre un juego de $75.000 quedan $25.000
+de ganancia **en una sola entrega** — el equivalente a diez kilos de pasta de
+maní. Es la primera vez en todo el análisis que el ticket cierra solo.
+
+**2. Los descuentos delatan la temporada.** Las publicaciones muestran
+descuentos de 27%, 40%, 47% y hasta 50%. Un descuento de esa magnitud en agosto
+no es promoción: es liquidación de fin de temporada. Consecuencia práctica:
+
+> **El precio contra el que hay que competir es el precio con descuento, no el de
+> lista.** Si Dakota aparece a $22.794 tras un 40% off, ese es el número que el
+> cliente ve. El costo de compra tiene que medirse contra eso.
+
+Y confirma por otro camino lo del calendario: si los vendedores están rematando,
+es porque la demanda de este año ya pasó.
+
+### Umbrales de costo, sobre un juego de camioneta a $75.000
+
+| Objetivo | Costo máximo del juego | Ganancia por venta |
+| --- | --- | --- |
+| x2 | $37.500 | $37.500 |
+| +50% | $50.000 | $25.000 |
+| +30% | $57.700 | $17.300 |
+
 ### Veredicto
 
 **Comprar stock ahora: no.** Es el peor momento del año para hacerlo — final de
