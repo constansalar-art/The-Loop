@@ -237,6 +237,101 @@ millón entero.
    La señal de escala es la **segunda** tanda vendiendo al mismo ritmo que la
    primera.
 
+## 7 bis. Evaluación: pasta de maní y maní frito salado
+
+Candidato propuesto con acceso a buenos precios de compra. Cambia la lógica: acá
+la ventaja no sería un hueco de distribución sino una **ventaja de costo**.
+
+### Lo que arreglan respecto del alfajor
+
+Los dos defectos estructurales del alfajor desaparecen:
+
+- **No se vencen en 45 días.** Pasta de maní cerrada dura del orden de 6 a 12
+  meses; el maní frito, varios meses. El stock que no rota sigue siendo stock,
+  no pérdida. Esto habilita comprar volumen sin la bomba de tiempo.
+- **Se recompran.** El alfajor es compra de impulso, una vez. La pasta de maní se
+  consume y se repone todos los meses. Un cliente que vuelve doce veces al año
+  con 30% de margen rinde más que uno que compra una sola vez al 100%.
+
+Además el producto encaja con el público definido: pasta de maní es artículo de
+consumo fitness/salud, y Nordelta es exactamente ese perfil.
+
+### Lo que no arreglan
+
+**Fallan el filtro de la sección 0, y peor que el alfajor.** Ambos están en
+Mercado Libre, en supermercados online (ChangoMás, Dino, Super Cristian), en
+dietéticas online (El Banquito, Natural Dietética, Eco Despensa, Coquitos) y en
+Rappi. No son productos de nicho sin distribución: son commodities con decenas
+de marcas compitiendo. El cliente compara el precio en veinte segundos.
+
+Anclas de precio minorista encontradas (agosto 2026, sin poder verificar los
+sitios porque están bloqueados desde este entorno):
+
+| Producto | Precio minorista |
+| --- | --- |
+| Maní salado, por kilo (Mercado Libre) | $3.582 – $6.024 |
+| Pasta de maní 1 kg, gama baja (Mani King y similares) | ~$4.300 |
+| Pasta de maní 1 kg, gama alta (Ancestral) | ~$22.000 |
+
+### El dato de mercado que cambia la decisión
+
+**El maní está en caída fuerte en 2026.** El precio FOB del maní argentino sin
+cáscara fue de US$1.096/t en marzo de 2026 contra US$1.536/t en marzo de 2025:
+**–29% interanual**. Al productor, de ~US$900/t se pasó a US$600–650/t, otro
+–30%.
+
+Dos consecuencias directas:
+
+1. **"Tener buen precio" es una ventaja que se evapora.** Si el costo de la
+   materia prima cae 30% para toda la industria, el precio de todos baja
+   detrás. La ventaja de compra de hoy puede ser el precio de mercado en unos
+   meses.
+2. **Comprar stock grande en un mercado en baja es comprar caro.** El maní no se
+   vence, pero si el precio de venta cae mientras se tiene el stock, el margen
+   se come solo. Es el riesgo inverso al vencimiento, con el mismo resultado.
+
+(Las estimaciones de cosecha 2025/26 que aparecen en las fuentes se contradicen
+entre sí —una habla de caída a 800.000 t y otra de cosecha récord— así que no
+apoyo nada en ese dato.)
+
+### El único lugar donde hay margen
+
+El spread en pasta de maní es de **5x entre la gama baja y la alta** (~$4.300
+contra ~$22.000 el kilo). Eso no es una ineficiencia de distribución: es
+posicionamiento de marca. Ahí vive el margen de esta categoría.
+
+Pero capturarlo requiere marca propia, envase y posicionamiento — o sea,
+fabricar o al menos fraccionar y marcar. Está fuera de "reventa pura", que es la
+restricción del proyecto. Comprando y revendiendo marca ajena conocida, se cae
+en la franja 20–40%: la misma de la Coca-Cola.
+
+### Veredicto
+
+| Producto | Veredicto | Por qué |
+| --- | --- | --- |
+| **Maní frito salado** | No | Commodity puro, ticket bajo, está en todos los kioscos, supermercados y en ML entre $3.582 y $6.024 el kilo. No hay nada que defender. |
+| **Pasta de maní** | Solo si el costo lo justifica | Estructuralmente mejor que el alfajor (recompra, no se vence, público correcto), pero comparable en precio. Depende enteramente de cuánto sea "buen precio". |
+
+### La cuenta que decide, y que solo se puede hacer con el número real
+
+El único dato que falta es el costo de compra. Con él, la prueba es de un minuto:
+
+> Costo por kilo, puesto en mano, **contra el listado más barato de Mercado Libre
+> con envío gratis a Nordelta**, del mismo producto y presentación.
+
+- Si el costo está **por debajo de la mitad** de ese precio → hay negocio, incluso
+  siendo comparable, porque queda margen para vender por debajo del mercado y
+  aun así ganar.
+- Si está entre la mitad y el 70% → es un negocio de 20–40%, de volumen y
+  recompra. Legítimo, pero no multiplica el millón.
+- Si está por encima del 70% → no hay negocio.
+
+Nótese que el benchmark **no** es el precio de góndola del supermercado, sino el
+listado más barato de Mercado Libre puesto en la puerta. Ese es el precio que el
+cliente de Nordelta realmente puede conseguir.
+
+---
+
 ## 8. Criterios de corte
 
 Definidos ahora, en frío, para no negociarlos después:
