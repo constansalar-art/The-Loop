@@ -16,6 +16,8 @@ SCHEMA = {
                 "properties": {
                     "start_seconds": {"type": "number"},
                     "end_seconds": {"type": "number"},
+                    "hook_start_seconds": {"type": "number"},
+                    "hook_end_seconds": {"type": "number"},
                     "title": {"type": "string"},
                     "caption": {"type": "string"},
                     "hashtags": {"type": "array", "items": {"type": "string"}},
@@ -23,7 +25,7 @@ SCHEMA = {
                     "score": {"type": "integer"},
                     "layout_hint": {"type": "string", "enum": ["auto", "split", "fullcam"]},
                 },
-                "required": ["start_seconds", "end_seconds", "title", "caption", "hashtags",
+                "required": ["start_seconds", "end_seconds", "hook_start_seconds", "hook_end_seconds", "title", "caption", "hashtags",
                              "reason", "score", "layout_hint"],
                 "additionalProperties": False,
             },
@@ -48,13 +50,24 @@ festejos). [CHAT xN] marca cuánto se acelera el chat respecto de lo normal. Son
 verdades: un pico sin nada interesante en la transcripción no sirve, y un buen remate \
 tranquilo sí puede servir.
 - La transcripción es automática y tiene errores; interpretá la intención.
-- Empezá el clip 1-3 segundos antes de que arranque la situación (que se entienda el \
-contexto, pero sin relleno: los primeros 2 segundos tienen que enganchar). Terminá justo \
-después del remate o la reacción. Duración entre {min_s} y {max_s} segundos.
+- Cada clip dura entre {min_s} y {max_s} segundos EN TOTAL, contando el gancho. Es un \
+límite duro: si el momento es más largo, quedate con la parte más fuerte.
+- GANCHO (cold open): los primeros 2 segundos deciden si la gente se queda. Elegí con \
+hook_start_seconds/hook_end_seconds un fragmento de 1.5 a 3 segundos con la frase o \
+reacción más fuerte del momento (normalmente el remate). Se muestra primero, con el título \
+encima, y después arranca el clip desde start_seconds. El gancho tiene que generar \
+curiosidad ("¿cómo llegó a esto?") sin spoilear todo el chiste.
+- El cuerpo (start_seconds a end_seconds) empieza justo donde arranca la situación, sin \
+saludos ni relleno, y termina apenas después del remate o la reacción.
+- NO elijas momentos con insultos racistas, xenófobos u homofóbicos, comentarios sobre \
+menores de edad, acusaciones a terceros, amenazas ni datos personales, aunque sean "fuertes". \
+Si un buen momento tiene una frase así en el medio, descartalo o cortalo para que quede \
+afuera. Esto baja la cuenta en TikTok y no vale la pena.
 - Los clips no se pueden superponer. Ordenalos de mejor a peor (score 1-10, sé exigente).
 
 Textos (en español rioplatense, natural, sin sonar a marketing):
-- title: gancho corto que se muestra sobre el video al inicio, máximo 7 palabras.
+- title: texto del gancho que se ve en los primeros segundos, máximo 7 palabras. Que genere \
+curiosidad o tensión (ej: "Nadie esperaba esta llamada"), no que describa todo.
 - caption: una línea para la descripción de TikTok.
 - hashtags: 3 a 5, sin el #.
 
@@ -140,8 +153,8 @@ def _snap(clip: dict, words: list, min_s: float, max_s: float, duration: float) 
     end = min(duration, end)
     if end - start < min_s:
         end = min(duration, start + min_s)
-    if end - start > max_s + 5:
-        end = start + max_s + 5
+    if end - start > max_s:
+        end = start + max_s
     return round(start, 2), round(end, 2)
 
 
@@ -187,13 +200,18 @@ def select_highlights(transcript: dict, loudness: dict, chat: list | None, durat
     words = [w for seg in transcript["segments"] for w in seg["words"]]
     clips = []
     for c in sorted(data["clips"], key=lambda c: -c["score"]):
-        start, end = _snap(c, words, g["min_clip_seconds"], g["max_clip_seconds"], duration)
+        hs, he = c["hook_start_seconds"], c["hook_end_seconds"]
+        hook = he - hs if 0.5 <= he - hs <= 4 else 0.0
+        body_max = g["max_clip_seconds"] - hook
+        start, end = _snap(c, words, max(g["min_clip_seconds"] - hook, 5), body_max, duration)
         if end <= start or any(start < o["end"] and end > o["start"] for o in clips):
             continue
         clips.append({
             "id": len(clips) + 1,
             "start": start,
             "end": end,
+            "hook_start": round(hs, 2) if hook else None,
+            "hook_end": round(he, 2) if hook else None,
             "vod_time": f"{fmt_ts(start)} - {fmt_ts(end)}",
             "score": c["score"],
             "title": c["title"],

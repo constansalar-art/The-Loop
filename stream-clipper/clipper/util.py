@@ -11,8 +11,8 @@ DEFAULTS = {
         "channel_context": "",
         "language": "es",
         "num_clips": 10,
-        "min_clip_seconds": 20,
-        "max_clip_seconds": 60,
+        "min_clip_seconds": 15,
+        "max_clip_seconds": 30,
         "use_chat": True,
     },
     "whisper": {"model": "auto", "device": "auto"},
@@ -30,10 +30,10 @@ DEFAULTS = {
         "size": 82,
         "words_per_chunk": 3,
         "uppercase": True,
-        "title_seconds": 4,
+        "title_seconds": 3,
         "title_size": 62,
     },
-    "render": {"encoder": "libx264", "crf": 20, "max_height": 1080},
+    "render": {"encoder": "libx264", "crf": 20, "max_height": 1080, "cut_silences": 1.2},
 }
 
 

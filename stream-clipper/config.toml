@@ -9,8 +9,8 @@ bronca, momentos graciosos con el chat, historias o charlas con remate.
 """
 language = "es"
 num_clips = 10            # cuántos clips proponer (después elegís vos cuáles subir)
-min_clip_seconds = 20
-max_clip_seconds = 60
+min_clip_seconds = 15
+max_clip_seconds = 30
 use_chat = true           # leer el chat de Kick como señal (experimental)
 
 [whisper]
@@ -42,10 +42,11 @@ font = "Arial Black"
 size = 82
 words_per_chunk = 3
 uppercase = true
-title_seconds = 4         # cuánto se ve el título-gancho al inicio (0 = todo el clip)
+title_seconds = 3         # cuánto se ve el título-gancho al inicio (0 = todo el clip)
 title_size = 62
 
 [render]
 encoder = "libx264"       # usá "h264_nvenc" si tenés NVIDIA (mucho más rápido)
 crf = 20
 max_height = 1080         # calidad máxima al descargar la VOD
+cut_silences = 1.2        # corta pausas sin habla de más de N segundos (0 = no cortar)
