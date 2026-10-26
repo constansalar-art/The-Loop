@@ -1,0 +1,51 @@
+# Configuración de stream-clipper. Todo es opcional: lo que borres toma el valor por defecto.
+
+[general]
+# Contexto del canal para que Claude entienda qué es un "buen momento".
+channel_context = """
+Streamer argentino en Kick. Contenido: apuestas en casinos online (slots) y just chatting.
+Los mejores momentos suelen ser: reacciones exageradas a ganancias o pérdidas grandes,
+bronca, momentos graciosos con el chat, historias o charlas con remate.
+"""
+language = "es"
+num_clips = 10            # cuántos clips proponer (después elegís vos cuáles subir)
+min_clip_seconds = 20
+max_clip_seconds = 60
+use_chat = true           # leer el chat de Kick como señal (experimental)
+
+[whisper]
+# "auto" = large-v3-turbo si hay GPU NVIDIA, "small" si es solo CPU.
+# Opciones: tiny, base, small, medium, large-v3, large-v3-turbo
+model = "auto"
+device = "auto"           # auto | cuda | cpu
+
+[claude]
+model = "claude-opus-5-5"
+effort = "high"           # low | medium | high (más alto = mejor selección, más caro)
+
+[layout]
+# "auto" detecta por clip si es facecam+juego o full cam. También: "split" o "fullcam".
+mode = "auto"
+# Rectángulos en fracciones del frame original: [x, y, ancho, alto], de 0 a 1.
+# Calibralos con:  python -m clipper frame <video o link> --at 00:30:00
+facecam = [0.72, 0.62, 0.28, 0.38]
+gameplay = [0.18, 0.0, 0.54, 1.0]
+# Parte de la altura del vertical que ocupa la facecam (el resto es el juego).
+facecam_height = 0.38
+# "cover" llena el espacio recortando los costados; "fit" muestra todo con fondo desenfocado.
+gameplay_fit = "cover"
+# Si la cara detectada ocupa más que esta fracción de la altura del frame -> full cam.
+fullcam_face_min_height = 0.16
+
+[subtitles]
+font = "Arial Black"
+size = 82
+words_per_chunk = 3
+uppercase = true
+title_seconds = 4         # cuánto se ve el título-gancho al inicio (0 = todo el clip)
+title_size = 62
+
+[render]
+encoder = "libx264"       # usá "h264_nvenc" si tenés NVIDIA (mucho más rápido)
+crf = 20
+max_height = 1080         # calidad máxima al descargar la VOD
