@@ -123,13 +123,19 @@ def build_prompt(transcript: dict, loudness: dict, chat: list | None, duration: 
 
 
 def _snap(clip: dict, words: list, min_s: float, max_s: float, duration: float) -> tuple[float, float]:
+    """Ajusta los cortes a palabras: arranca en la primera palabra desde el inicio pedido y
+    termina en la última que cierra antes del final pedido (sin arrastrar frases vecinas)."""
     start, end = clip["start_seconds"], clip["end_seconds"]
-    near_s = [w for w in words if abs(w["start"] - start) < 2.0]
-    if near_s:
-        start = min(near_s, key=lambda w: abs(w["start"] - start))["start"] - 0.25
-    near_e = [w for w in words if abs(w["end"] - end) < 2.0]
-    if near_e:
-        end = min(near_e, key=lambda w: abs(w["end"] - end))["end"] + 0.6
+    first = next((w for w in words if w["start"] >= start - 0.3), None)
+    if first and first["start"] - start < 2.0:
+        start = first["start"] - 0.25
+    last = None
+    for w in words:
+        if w["end"] > end + 0.3:
+            break
+        last = w
+    if last and end - last["end"] < 2.0:
+        end = last["end"] + 0.6
     start = max(0.0, start)
     end = min(duration, end)
     if end - start < min_s:
