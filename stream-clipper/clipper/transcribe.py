@@ -1,5 +1,8 @@
 import time
+import wave
 from pathlib import Path
+
+import numpy as np
 
 from .util import fmt_ts, log, write_json
 
@@ -31,9 +34,14 @@ def _resolve(cfg: dict) -> tuple[str, str, str]:
 def _run(wav: Path, model_name: str, device: str, compute: str, language: str) -> list:
     from faster_whisper import WhisperModel
 
+    # Leemos el WAV nosotros (16 kHz mono): evita depender de PyAV, que cambia su API seguido.
+    with wave.open(str(wav), "rb") as w:
+        audio = np.frombuffer(w.readframes(w.getnframes()), dtype=np.int16)
+    audio = audio.astype(np.float32) / 32768.0
+
     model = WhisperModel(model_name, device=device, compute_type=compute)
     segments, info = model.transcribe(
-        str(wav), language=language, vad_filter=True, word_timestamps=True,
+        audio, language=language, vad_filter=True, word_timestamps=True,
         beam_size=5 if device == "cuda" else 1, condition_on_previous_text=False,
     )
     result = []
