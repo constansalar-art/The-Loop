@@ -285,7 +285,7 @@ def render_clip(video: Path | str, info: dict, clip: dict, words: list, out_dir:
     # correcciones manuales de la transcripción para este clip: {"palabra mal": "bien"}
     fixes = {k.lower(): v for k, v in (clip.get("word_fixes") or {}).items()}
     for w in clip_words:
-        key = w["word"].lower().strip(".,;:!?¡¿")
+        key = w["word"].lower().strip(" .,;:!?¡¿")
         if key in fixes:
             w["word"] = w["word"].lower().replace(key, fixes[key])
     censor = Censor(cfg)

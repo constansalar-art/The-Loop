@@ -109,10 +109,10 @@ def _render_all(wd: Path, cfg: dict, only: set | None, layout: str | None):
             continue
         tags = " ".join("#" + h.lstrip("#") for h in c["hashtags"])
         lines.append(
-            f"[{c['id']:02d}] {c['file']}  (score {c['score']}/10, VOD {c['vod_time']}, "
+            f"[{c['id']:02d}] {c['file']}  (score {c['score']}/10, VOD {c.get('vod_time', '')}, "
             f"{c.get('rendered_layout', '')})\n"
             f"Título: {c['title']}\nDescripción: {c['caption']} {tags}\n"
-            f"Por qué: {c['reason']}\n"
+            f"Por qué: {c.get('reason', '')}\n"
         )
     (out_dir / "LEEME_clips.txt").write_text("\n".join(lines), encoding="utf-8")
     log(f"Clips listos en {out_dir}  (textos para TikTok en LEEME_clips.txt)")
