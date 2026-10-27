@@ -205,6 +205,12 @@ def render_clip(video: Path, info: dict, clip: dict, words: list, out_dir: Path,
     tmp.mkdir(exist_ok=True)
     ass_name = f"clip_{clip['id']:02d}.ass"
     clip_words = remap_words(words, segs)
+    # correcciones manuales de la transcripción para este clip: {"palabra mal": "bien"}
+    fixes = {k.lower(): v for k, v in (clip.get("word_fixes") or {}).items()}
+    for w in clip_words:
+        key = w["word"].lower().strip(".,;:!?¡¿")
+        if key in fixes:
+            w["word"] = w["word"].lower().replace(key, fixes[key])
     censor = Censor(cfg)
     bleeps = censor.intervals(clip_words)
     for w in clip_words:
