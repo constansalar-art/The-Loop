@@ -46,8 +46,9 @@ font = "Arial Black"
 size = 82
 words_per_chunk = 3
 uppercase = true
-title_seconds = 3         # cuánto se ve el título-gancho al inicio (0 = todo el clip)
-title_size = 62
+title_seconds = 3         # si el clip no tiene gancho: cuánto se ve el título (0 = todo el clip)
+title_size = 74
+title_box = "&H0000D7FF"    # color de la caja del título (formato ASS &HBBGGRR: amarillo)
 
 [render]
 encoder = "libx264"       # usá "h264_nvenc" si tenés NVIDIA (mucho más rápido)

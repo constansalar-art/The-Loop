@@ -27,7 +27,7 @@ def _chunks(words: list, size: int) -> list:
 
 
 def build_ass(words: list, clip_start: float, clip_end: float, title: str,
-              sub_y: int, title_y: int, cfg: dict) -> str:
+              sub_y: int, title_y: int, cfg: dict, title_dur: float | None = None) -> str:
     s = cfg["subtitles"]
     dur = clip_end - clip_start
     header = f"""[Script Info]
@@ -40,17 +40,21 @@ ScaledBorderAndShadow: yes
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
 Style: Sub,{s['font']},{s['size']},&H00FFFFFF,&H00FFFFFF,&H00000000,&H90000000,-1,0,0,0,100,100,0,0,1,7,3,5,70,70,0,1
-Style: Title,{s['font']},{s['title_size']},&H00000000,&H00000000,&H00FFFFFF,&H00FFFFFF,-1,0,0,0,100,100,0,0,3,18,0,8,90,90,230,1
+Style: Title,{s['font']},{s['title_size']},&H00000000,&H00000000,{s['title_box']},&H64000000,-1,0,0,0,100,100,0,0,3,22,9,8,80,80,230,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 """
     events = []
     if title:
-        t_end = dur if not s["title_seconds"] else min(dur, s["title_seconds"])
+        # dura lo mismo que el gancho; si no hay gancho, title_seconds (0 = todo el clip)
+        t_end = title_dur or (min(dur, s["title_seconds"]) if s["title_seconds"] else dur)
         text = _clean(title.upper() if s["uppercase"] else title)
+        # "pop" de entrada: crece rápido, rebota apenas y queda levemente inclinado
+        anim = ("\\fscx40\\fscy40\\t(0,170,\\fscx110\\fscy110)"
+                "\\t(170,280,\\fscx100\\fscy100)\\frz-2")
         events.append(f"Dialogue: 1,{_ts(0)},{_ts(t_end)},Title,,0,0,0,,"
-                      f"{{\\an8\\pos({W // 2},{title_y})}}{text}")
+                      f"{{\\an8\\pos({W // 2},{title_y}){anim}}}{text}")
 
     inside = [w for w in words if w["end"] > clip_start and w["start"] < clip_end]
     chunks = _chunks(inside, s["words_per_chunk"])

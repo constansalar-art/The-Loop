@@ -263,7 +263,9 @@ def render_clip(video: Path, info: dict, clip: dict, words: list, out_dir: Path,
     for w in clip_words:
         if censor.is_bad(w["word"]):
             w["word"] = censor.mask(w["word"])
-    ass = build_ass(clip_words, 0.0, total, clip["title"], sub_y, title_y, cfg)
+    has_hook = clip.get("hook_start") is not None and clip.get("hook_end") is not None
+    title_dur = segs[0][1] - segs[0][0] if has_hook else None
+    ass = build_ass(clip_words, 0.0, total, clip["title"], sub_y, title_y, cfg, title_dur)
     (tmp / ass_name).write_text(ass, encoding="utf-8")
     graph += (f";[base]ass={ass_name}[v];[acat]loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000[an];"
               + audio_filter(bleeps, censor.mode, "an", "a"))
