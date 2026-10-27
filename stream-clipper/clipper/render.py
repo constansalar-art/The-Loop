@@ -18,34 +18,74 @@ def _rect_px(rect: list, vw: int, vh: int) -> tuple[int, int, int, int]:
     return pw, ph, max(px, 0), max(py, 0)
 
 
+def _signature(frame):
+    """Huella chica de un frame para comparar escenas (gris + histograma de color)."""
+    import cv2
+
+    small = cv2.resize(frame, (96, 54), interpolation=cv2.INTER_AREA)
+    gray = cv2.GaussianBlur(cv2.cvtColor(small, cv2.COLOR_BGR2GRAY), (3, 3), 0)
+    hsv = cv2.cvtColor(small, cv2.COLOR_BGR2HSV)
+    hist = cv2.calcHist([hsv], [0, 1], None, [16, 8], [0, 180, 0, 256])
+    cv2.normalize(hist, hist)
+    return gray, hist
+
+
+def _similarity(a, b) -> float:
+    import cv2
+
+    g = float(cv2.matchTemplate(a[0], b[0], cv2.TM_CCOEFF_NORMED)[0][0])
+    h = float(cv2.compareHist(a[1], b[1], cv2.HISTCMP_CORREL))
+    return (g + h) / 2
+
+
+def load_scene_refs(cfg: dict) -> dict:
+    """Ejemplos de cada escena guardados con el comando 'escena' (escenas/split_1.png, ...)."""
+    import cv2
+
+    folder = Path(cfg.get("_root", ".")) / "escenas"
+    refs = {}
+    for img in sorted(folder.glob("*.png")):
+        mode = img.stem.split("_")[0]
+        if mode in ("split", "fullcam"):
+            refs.setdefault(mode, []).append(_signature(cv2.imread(str(img))))
+    return refs
+
+
 def detect_layout(video: Path, start: float, end: float, cfg: dict) -> tuple[str, float]:
-    """Mira unos frames del clip: si hay una cara grande es full cam. Devuelve (modo, centro_x)."""
+    """Decide el layout del clip y dónde centrar el recorte de cámara completa.
+
+    Si hay ejemplos de escenas (comando 'escena'), compara cada frame contra ellos; si no,
+    usa el tamaño de la cara más grande. El centro es la mediana de las caras detectadas."""
     import cv2
 
     cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
+    refs = load_scene_refs(cfg)
     cap = cv2.VideoCapture(str(video))
     threshold = cfg["layout"]["fullcam_face_min_height"]
-    big, centers, samples = 0, [], 6
+    votes = {"split": 0, "fullcam": 0}
+    centers, samples = [], 6
     for i in range(samples):
         t = start + (end - start) * (i + 0.5) / samples
         cap.set(cv2.CAP_PROP_POS_MSEC, t * 1000)
         ok, frame = cap.read()
         if not ok:
             continue
-        fh, fw = frame.shape[:2]
-        scale = 640 / fw
+        scale = 640 / frame.shape[1]
         gray = cv2.cvtColor(cv2.resize(frame, None, fx=scale, fy=scale), cv2.COLOR_BGR2GRAY)
-        faces = cascade.detectMultiScale(gray, 1.1, 6, minSize=(30, 30))
-        if len(faces):
-            x, y, w, h = max(faces, key=lambda f: f[3])
-            if h / gray.shape[0] >= threshold:
-                big += 1
-                centers.append((x + w / 2) / gray.shape[1])
+        faces = cascade.detectMultiScale(gray, 1.1, 6, minSize=(24, 24))
+        centers += [(x + w / 2) / gray.shape[1] for x, y, w, h in faces]
+        if refs:
+            sig = _signature(frame)
+            best = max(refs, key=lambda m: max(_similarity(sig, r) for r in refs[m]))
+            votes[best] += 1
+        elif len(faces) and max(f[3] for f in faces) / gray.shape[0] >= threshold:
+            votes["fullcam"] += 1
+        else:
+            votes["split"] += 1
     cap.release()
-    if big >= samples // 2:
-        centers.sort()
-        return "fullcam", centers[len(centers) // 2]
-    return "split", 0.5
+    centers.sort()
+    center = centers[len(centers) // 2] if centers else 0.5
+    return ("fullcam" if votes["fullcam"] > votes["split"] else "split"), center
 
 
 def _filter_split(vw: int, vh: int, cfg: dict, src: str, out: str) -> tuple[str, int]:

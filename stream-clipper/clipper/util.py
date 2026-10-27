@@ -45,6 +45,7 @@ def load_config(path: Path) -> dict:
             user = tomllib.load(f)
         for section, values in user.items():
             cfg.setdefault(section, {}).update(values)
+    cfg["_root"] = str(path.resolve().parent)
     return cfg
 
 

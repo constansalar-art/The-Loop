@@ -151,6 +151,17 @@ def cmd_frame(args, cfg):
         "Ajustá los números hasta que los rectángulos encajen.")
 
 
+def cmd_escena(args, cfg):
+    src = Path(args.source)
+    video = _video_for(src) if src.is_dir() else src
+    folder = Path(cfg["_root"]) / "escenas"
+    folder.mkdir(exist_ok=True)
+    n = len(list(folder.glob(f"{args.tipo}_*.png"))) + 1
+    out = folder / f"{args.tipo}_{n}.png"
+    media.extract_frame(video, parse_ts(args.at), out)
+    log(f"Guardado {out}. Guardá al menos un ejemplo de cada escena que uses (split y fullcam).")
+
+
 def main():
     p = argparse.ArgumentParser(prog="clipper", description="VOD -> clips verticales para TikTok")
     p.add_argument("--config", default=str(ROOT / "config.toml"))
@@ -175,6 +186,12 @@ def main():
     f.add_argument("--at", default="00:10:00", help="momento del video, ej 01:23:45")
     f.add_argument("--out")
 
+    e = sub.add_parser("escena", help="guardar un ejemplo de escena para detectar el layout solo")
+    e.add_argument("source", help="video o carpeta de trabajo")
+    e.add_argument("--at", required=True, help="momento donde se ve esa escena, ej 01:40:00")
+    e.add_argument("--tipo", required=True, choices=["split", "fullcam"],
+                   help="split = facecam + juego, fullcam = cámara completa")
+
     args = p.parse_args()
     cfg = load_config(Path(args.config))
-    {"run": cmd_run, "render": cmd_render, "frame": cmd_frame}[args.cmd](args, cfg)
+    {"run": cmd_run, "render": cmd_render, "frame": cmd_frame, "escena": cmd_escena}[args.cmd](args, cfg)
