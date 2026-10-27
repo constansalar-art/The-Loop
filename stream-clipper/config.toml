@@ -60,6 +60,18 @@ crf = 20
 max_height = 1080         # calidad máxima al descargar la VOD
 cut_silences = 1.2        # corta pausas sin habla de más de N segundos (0 = no cortar)
 
+[brand]
+# Cartel del canal en todos los clips (logo + dirección). No tapa el video: en los clips de juego
+# va en una franja propia entre la cámara y el juego; en cámara completa, debajo de la imagen.
+enabled = true
+text = "kick.com/dramacer0"
+color = "#53FC18"          # verde Kick
+icon = "assets/kick-icon.png"
+font_file = "Anton.ttf"    # tipografía del cartel (carpeta fonts/)
+height = 64                # alto del cartel en px (el video mide 1080x1920)
+band_height = 96           # alto de la franja entre cámara y juego
+band_color = "0x0b0b0b"
+
 [censor]
 enabled = true
 audio = "beep"            # beep (pitido) | mute (silencio)

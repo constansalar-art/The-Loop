@@ -90,9 +90,12 @@ def detect_layout(video: Path, start: float, end: float, cfg: dict) -> tuple[str
 
 
 def _filter_split(vw: int, vh: int, cfg: dict, src: str, out: str) -> tuple[str, int]:
+    """Cámara arriba, franja del cartel (si hay) y juego abajo. Devuelve (filtro, y donde
+    empieza el juego)."""
     lay = cfg["layout"]
     top = _even(H * lay["facecam_height"])
-    bot = H - top
+    band = _even(cfg["brand"]["band_height"]) if cfg["brand"]["enabled"] else 0
+    bot = H - top - band
     cw, ch, cx, cy = _rect_px(lay["facecam"], vw, vh)
     gw, gh, gx, gy = _rect_px(lay["gameplay"], vw, vh)
     n = out  # sufijo para que las etiquetas no choquen entre segmentos
@@ -106,6 +109,11 @@ def _filter_split(vw: int, vh: int, cfg: dict, src: str, out: str) -> tuple[str,
     else:
         game = (f"[s{n}b]crop={gw}:{gh}:{gx}:{gy},scale={W}:{bot}:force_original_aspect_ratio=increase,"
                 f"crop={W}:{bot},setsar=1[game{n}]")
+    if band:
+        color = cfg["brand"]["band_color"]
+        bar = f"color=c={color}:s={W}x{band}:r=30,setsar=1[bar{n}]"
+        return (f"{cam};{game};{bar};[cam{n}][bar{n}][game{n}]vstack=inputs=3:shortest=1[{out}]",
+                top + band)
     return f"{cam};{game};[cam{n}][game{n}]vstack=inputs=2[{out}]", top
 
 
@@ -119,7 +127,7 @@ def _filter_fullcam(vw: int, vh: int, center_x: float, src: str, out: str,
     if not rect:
         cw = min(_even(vh * 9 / 16), _even(vw))
         cx = min(max(_even(center_x * vw - cw / 2), 0), vw - cw)
-        return f"[{src}]crop={cw}:{vh}:{cx}:0,scale={W}:{H},setsar=1[{out}]", int(H * 0.66)
+        return f"[{src}]crop={cw}:{vh}:{cx}:0,scale={W}:{H},setsar=1[{out}]", int(H * 0.66) - 20
     rw, rh, rx, ry = _rect_px(rect, vw, vh)
     aspect = lay.get("fullcam_aspect", 1.0)
     cw = min(_even(rh * aspect), rw)
@@ -130,7 +138,7 @@ def _filter_fullcam(vw: int, vh: int, center_x: float, src: str, out: str,
              f"[f1{n}]scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},"
              f"boxblur=30:3[fb{n}];[f2{n}]scale={W}:{fh}[ff{n}];"
              f"[fb{n}][ff{n}]overlay=0:(H-h)/2,setsar=1[{out}]")
-    return graph, (H + fh) // 2 + 110
+    return graph, (H + fh) // 2 + 110  # 110 px debajo de la imagen
 
 
 PAD = 0.35         # silencio que se deja antes y después de cada tramo
@@ -237,13 +245,16 @@ def render_clip(video: Path, info: dict, clip: dict, words: list, out_dir: Path,
     parts, inputs = [], []
     for i, (s, e) in enumerate(segs):
         inputs += ["-ss", f"{s:.3f}", "-t", f"{e - s:.3f}", "-i", video.resolve()]
+        bh = cfg["brand"]["height"] if cfg["brand"]["enabled"] else 0
         if mode == "fullcam":
-            g, sub_y = _filter_fullcam(vw, vh, center, f"{i}:v", f"v{i}", cfg)
-            title_y = 230
+            g, below = _filter_fullcam(vw, vh, center, f"{i}:v", f"v{i}", cfg)
+            # cartel justo debajo de la imagen (zona desenfocada) y subtítulos debajo
+            badge_y, sub_y, title_y = below - 90, below - 90 + bh + 70, 230
         else:
-            g, top = _filter_split(vw, vh, cfg, f"{i}:v", f"v{i}")
-            # subtítulos en la unión cam/juego, título debajo para no tapar la cara
-            sub_y, title_y = top, top + 130
+            g, game_y = _filter_split(vw, vh, cfg, f"{i}:v", f"v{i}")
+            # cartel centrado en su franja; subtítulos y título arriba del juego
+            band = cfg["brand"]["band_height"]
+            badge_y, sub_y, title_y = game_y - band + (band - bh) // 2, game_y + 70, game_y + 170
         # mismo fps en todos los segmentos para que concat no falle
         parts.append(g + f";[v{i}]fps=30[v{i}f]")
     concat_in = "".join(f"[v{i}f][{i}:a]" for i in range(len(segs)))
@@ -273,7 +284,14 @@ def render_clip(video: Path, info: dict, clip: dict, words: list, out_dir: Path,
     for folder in (Path(__file__).resolve().parent.parent / "fonts", Path(cfg.get("_root", ".")) / "fonts"):
         for f in folder.glob("*.[ot]tf") if folder.is_dir() else []:
             shutil.copy(f, tmp / "fonts" / f.name)
-    graph += (f";[base]ass={ass_name}:fontsdir=fonts[v];[acat]loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000[an];"
+    base = "base"
+    if cfg["brand"]["enabled"]:
+        from .brand import make_badge
+        bw, _ = make_badge(cfg, tmp / "badge.png")
+        inputs += ["-loop", "1", "-i", "badge.png"]
+        graph += f";[base][{len(segs)}:v]overlay=x=(W-w)/2:y={badge_y}:shortest=1[branded]"
+        base = "branded"
+    graph += (f";[{base}]ass={ass_name}:fontsdir=fonts[v];[acat]loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000[an];"
               + audio_filter(bleeps, censor.mode, "an", "a"))
 
     out = out_dir / f"{clip['id']:02d}_{slugify(clip['title'])}.mp4"
