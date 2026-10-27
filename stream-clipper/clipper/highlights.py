@@ -42,6 +42,11 @@ potencial viral.
 Contexto del canal:
 {context}
 
+Objetivo: que alguien que no conoce al streamer lo descubra en TikTok y quiera ir a verlo \
+en vivo. Priorizá momentos que muestren su personalidad y la dinámica con amigos e invitados, lo \
+que solo pasa en vivo (retos, castigos, ruletas, apuestas entre amigos, el chat metiéndose), \
+humor que se entiende solo y cosas que alguien le mandaría a un amigo. Variá los tipos de clip.
+
 Cómo elegir:
 - Priorizá gritos, enojos y bronca, festejos de ganancias, humor, momentos inesperados, \
 remates de historias e interacción graciosa con el chat. Un clip tiene que entenderse solo, sin haber visto el stream.
@@ -182,7 +187,7 @@ def select_highlights(transcript: dict, loudness: dict, chat: list | None, durat
                            min_s=g["min_clip_seconds"], max_s=g["max_clip_seconds"])
     user = build_prompt(transcript, loudness, chat, duration)
     user += (f"\n\nElegí los {g['num_clips']} mejores clips. Si no hay tantos momentos buenos, "
-             "devolvé menos: prefiero pocos buenos que relleno.")
+             "devolvé menos, pero no descartes momentos buenos por ser parecidos en calidad: el streamer elige después cuáles subir.")
     prompt_out.write_text(f"=== SYSTEM ===\n{system}\n\n=== USER ===\n{user}", encoding="utf-8")
     if dry_run:
         log(f"Prompt guardado en {prompt_out} (modo prueba, no se llamó a Claude).")
