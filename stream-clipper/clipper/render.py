@@ -1,4 +1,5 @@
 """Detección de layout (facecam+juego vs full cam) y render vertical 1080x1920 con ffmpeg."""
+import os
 import shutil
 from pathlib import Path
 
@@ -226,7 +227,7 @@ def remap_words(words: list, segs: list) -> list:
     return out
 
 
-def render_clip(video: Path, info: dict, clip: dict, words: list, out_dir: Path,
+def render_clip(video: Path | str, info: dict, clip: dict, words: list, out_dir: Path,
                 cfg: dict, force_layout: str | None = None) -> Path:
     start, end = clip["start"], clip["end"]
     if clip.get("gameplay"):  # recorte del juego distinto para este clip
@@ -236,7 +237,8 @@ def render_clip(video: Path, info: dict, clip: dict, words: list, out_dir: Path,
         mode = cfg["layout"]["mode"]
     center = 0.5
     if mode != "split":
-        detected, center = detect_layout(video, start, end, cfg)
+        # si la fuente es un link, la detección usa la copia liviana local (meta "preview")
+        detected, center = detect_layout(Path(info.get("preview") or video), start, end, cfg)
         mode = mode or detected
 
     segs = clip_segments(clip, words, clip.get("cut_silences", cfg["render"].get("cut_silences", 0)))
@@ -244,7 +246,11 @@ def render_clip(video: Path, info: dict, clip: dict, words: list, out_dir: Path,
     vw, vh = info["width"], info["height"]
     parts, inputs = [], []
     for i, (s, e) in enumerate(segs):
-        inputs += ["-ss", f"{s:.3f}", "-t", f"{e - s:.3f}", "-i", video.resolve()]
+        if isinstance(video, str):  # link HLS: ffmpeg lee solo estos segundos
+            ca = os.environ.get("SSL_CERT_FILE")
+            inputs += (["-ca_file", ca] if ca else []) + ["-ss", f"{s:.3f}", "-t", f"{e - s:.3f}", "-i", video]
+        else:
+            inputs += ["-ss", f"{s:.3f}", "-t", f"{e - s:.3f}", "-i", video.resolve()]
         bh = cfg["brand"]["height"] if cfg["brand"]["enabled"] else 0
         if mode == "fullcam":
             g, below = _filter_fullcam(vw, vh, center, f"{i}:v", f"v{i}", cfg)

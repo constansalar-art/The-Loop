@@ -81,7 +81,8 @@ def cmd_run(args, cfg):
 
 def _render_all(wd: Path, cfg: dict, only: set | None, layout: str | None):
     meta = read_json(wd / "meta.json")
-    video = Path(meta["video"])
+    # la fuente puede ser un archivo o un link (HLS) para no bajar la VOD entera
+    video = meta["video"] if media.is_url(meta["video"]) else Path(meta["video"])
     sel_path = wd / "selection.json"
     clips = read_json(sel_path)["clips"]
     words = []
