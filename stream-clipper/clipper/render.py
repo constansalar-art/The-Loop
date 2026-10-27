@@ -168,6 +168,8 @@ def remap_words(words: list, segs: list) -> list:
 def render_clip(video: Path, info: dict, clip: dict, words: list, out_dir: Path,
                 cfg: dict, force_layout: str | None = None) -> Path:
     start, end = clip["start"], clip["end"]
+    if clip.get("gameplay"):  # recorte del juego distinto para este clip
+        cfg = {**cfg, "layout": {**cfg["layout"], "gameplay": clip["gameplay"]}}
     mode = force_layout or (clip.get("layout") if clip.get("layout") in ("split", "fullcam") else None)
     if not mode and cfg["layout"]["mode"] in ("split", "fullcam"):
         mode = cfg["layout"]["mode"]

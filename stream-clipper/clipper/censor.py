@@ -25,10 +25,13 @@ class Censor:
         self.mode = c.get("audio", "beep")  # beep | mute
 
     def is_bad(self, word: str) -> bool:
-        return self.enabled and bool(self.pattern.match(_norm(word)))
+        # Whisper a veces ya escribe las malas palabras con asteriscos ("p***o")
+        return self.enabled and ("*" in word or bool(self.pattern.match(_norm(word))))
 
     def mask(self, word: str) -> str:
         """'mierda,' -> 'M*****,' (respeta la puntuación de alrededor)."""
+        if "*" in word:
+            return word
         m = re.match(r"^(\W*)(\w)(\w*)(\W*)$", word)
         if not m:
             return "*" * len(word)
