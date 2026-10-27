@@ -5,13 +5,13 @@
 channel_context = """
 Streamer argentino en Kick. Contenido: apuestas en casinos online (slots) y just chatting.
 Los mejores momentos suelen ser: reacciones exageradas a ganancias o pérdidas grandes,
-bronca, momentos graciosos con el chat, historias o charlas con remate.
+gritos, bronca y enojos, festejos, momentos graciosos con el chat, historias o charlas con remate.
 """
 language = "es"
 num_clips = 10            # cuántos clips proponer (después elegís vos cuáles subir)
 min_clip_seconds = 15
 max_clip_seconds = 30
-use_chat = true           # leer el chat de Kick como señal (experimental)
+use_chat = false          # chat de Kick (experimental: scrapea esquivando su anti-bot, no recomendado)
 
 [whisper]
 # "auto" = large-v3-turbo si hay GPU NVIDIA, "small" si es solo CPU.
@@ -50,3 +50,8 @@ encoder = "libx264"       # usá "h264_nvenc" si tenés NVIDIA (mucho más rápi
 crf = 20
 max_height = 1080         # calidad máxima al descargar la VOD
 cut_silences = 1.2        # corta pausas sin habla de más de N segundos (0 = no cortar)
+
+[censor]
+enabled = true
+audio = "beep"            # beep (pitido) | mute (silencio)
+# words = ["put[oa]s?", "mierdas?"]   # opcional: tu propia lista (regex por palabra entera)

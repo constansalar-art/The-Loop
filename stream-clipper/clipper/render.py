@@ -1,6 +1,7 @@
 """Detección de layout (facecam+juego vs full cam) y render vertical 1080x1920 con ffmpeg."""
 from pathlib import Path
 
+from .censor import Censor, audio_filter
 from .subtitles import H, W, build_ass
 from .util import log, run, slugify
 
@@ -138,9 +139,16 @@ def render_clip(video: Path, info: dict, clip: dict, words: list, out_dir: Path,
     tmp = out_dir / "_tmp"
     tmp.mkdir(exist_ok=True)
     ass_name = f"clip_{clip['id']:02d}.ass"
-    ass = build_ass(remap_words(words, segs), 0.0, total, clip["title"], sub_y, title_y, cfg)
+    clip_words = remap_words(words, segs)
+    censor = Censor(cfg)
+    bleeps = censor.intervals(clip_words)
+    for w in clip_words:
+        if censor.is_bad(w["word"]):
+            w["word"] = censor.mask(w["word"])
+    ass = build_ass(clip_words, 0.0, total, clip["title"], sub_y, title_y, cfg)
     (tmp / ass_name).write_text(ass, encoding="utf-8")
-    graph += f";[base]ass={ass_name}[v];[acat]loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000[a]"
+    graph += (f";[base]ass={ass_name}[v];[acat]loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000[an];"
+              + audio_filter(bleeps, censor.mode, "an", "a"))
 
     out = out_dir / f"{clip['id']:02d}_{slugify(clip['title'])}.mp4"
     r = cfg["render"]
@@ -148,7 +156,7 @@ def render_clip(video: Path, info: dict, clip: dict, words: list, out_dir: Path,
         venc = ["-c:v", "h264_nvenc", "-preset", "p5", "-cq", str(r["crf"] + 1), "-b:v", "0"]
     else:
         venc = ["-c:v", "libx264", "-preset", "medium", "-crf", str(r["crf"])]
-    log(f"Renderizando clip {clip['id']} ({mode}, {total:.0f} s): {clip['title']}")
+    log(f"Renderizando clip {clip['id']} ({mode}, {total:.0f} s, {len(bleeps)} censuras): {clip['title']}")
     # cwd = carpeta temporal para pasarle a 'ass' un nombre sin ruta (evita problemas con C:\ en Windows)
     run(["ffmpeg", "-y", "-v", "error", *inputs, "-filter_complex", graph,
          "-map", "[v]", "-map", "[a]", *venc, "-pix_fmt", "yuv420p",

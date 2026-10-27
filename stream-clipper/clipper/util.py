@@ -13,7 +13,7 @@ DEFAULTS = {
         "num_clips": 10,
         "min_clip_seconds": 15,
         "max_clip_seconds": 30,
-        "use_chat": True,
+        "use_chat": False,
     },
     "whisper": {"model": "auto", "device": "auto"},
     "claude": {"model": "claude-opus-5-5", "effort": "high"},
@@ -33,6 +33,7 @@ DEFAULTS = {
         "title_seconds": 3,
         "title_size": 62,
     },
+    "censor": {"enabled": True, "audio": "beep"},
     "render": {"encoder": "libx264", "crf": 20, "max_height": 1080, "cut_silences": 1.2},
 }
 

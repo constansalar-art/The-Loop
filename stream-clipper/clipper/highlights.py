@@ -43,10 +43,10 @@ Contexto del canal:
 {context}
 
 Cómo elegir:
-- Priorizá reacciones fuertes, humor, momentos inesperados, bronca, remates de historias y \
-interacción graciosa con el chat. Un clip tiene que entenderse solo, sin haber visto el stream.
-- [VOL +N dB] marca cuánto sube el volumen respecto de los minutos alrededor (gritos, \
-festejos). [CHAT xN] marca cuánto se acelera el chat respecto de lo normal. Son pistas, no \
+- Priorizá gritos, enojos y bronca, festejos de ganancias, humor, momentos inesperados, \
+remates de historias e interacción graciosa con el chat. Un clip tiene que entenderse solo, sin haber visto el stream.
+- [GRITO +N dB] marca cuánto más fuerte que su voz normal habla en esa frase (gritos, \
+bronca, festejos). [CHAT xN] marca cuánto se acelera el chat respecto de lo normal. Son pistas, no \
 verdades: un pico sin nada interesante en la transcripción no sirve, y un buen remate \
 tranquilo sí puede servir.
 - La transcripción es automática y tiene errores; interpretá la intención.
@@ -59,13 +59,15 @@ encima, y después arranca el clip desde start_seconds. El gancho tiene que gene
 curiosidad ("¿cómo llegó a esto?") sin spoilear todo el chiste.
 - El cuerpo (start_seconds a end_seconds) empieza justo donde arranca la situación, sin \
 saludos ni relleno, y termina apenas después del remate o la reacción.
+- Las malas palabras NO son motivo para descartar un momento: se censuran solas con un \
+pitido. Lo que sí hay que descartar es otra cosa:
 - NO elijas momentos con insultos racistas, xenófobos u homofóbicos, comentarios sobre \
 menores de edad, acusaciones a terceros, amenazas ni datos personales, aunque sean "fuertes". \
 Si un buen momento tiene una frase así en el medio, descartalo o cortalo para que quede \
 afuera. Esto baja la cuenta en TikTok y no vale la pena.
 - Los clips no se pueden superponer. Ordenalos de mejor a peor (score 1-10, sé exigente).
 
-Textos (en español rioplatense, natural, sin sonar a marketing):
+Textos (en español rioplatense, natural, sin sonar a marketing, sin malas palabras):
 - title: texto del gancho que se ve en los primeros segundos, máximo 7 palabras. Que genere \
 curiosidad o tensión (ej: "Nadie esperaba esta llamada"), no que describa todo.
 - caption: una línea para la descripción de TikTok.
@@ -93,21 +95,36 @@ def _chat_rate(chat: list | None, duration: int) -> np.ndarray | None:
     return window / base
 
 
+def _shout_scores(segments: list, db: np.ndarray, window: float = 300) -> list[float]:
+    """Cuánto más fuerte es cada frase respecto de cómo habla el streamer en esos minutos.
+
+    Comparar contra la voz (y no contra todo el audio) evita que la música del slot o los
+    silencios hagan que todo parezca un grito."""
+    peaks = []
+    for seg in segments:
+        a, b = int(seg["start"]), int(seg["end"]) + 1
+        peaks.append(float(db[a:b].max()) if a < len(db) and b > a else -100.0)
+    peaks = np.array(peaks)
+    starts = np.array([seg["start"] for seg in segments])
+    scores = []
+    for i, seg in enumerate(segments):
+        near = np.abs(starts - seg["start"]) <= window
+        scores.append(float(peaks[i] - np.median(peaks[near])))
+    return scores
+
+
 def build_prompt(transcript: dict, loudness: dict, chat: list | None, duration: float) -> str:
-    rel = np.array(loudness["relative"])
+    db = np.array(loudness["db"])
+    segments = transcript["segments"]
+    shout = _shout_scores(segments, db)
     rate = _chat_rate(chat, int(duration))
     lines = []
     prev_end = 0.0
-    for seg in transcript["segments"]:
+    for seg, sc in zip(segments, shout):
         s, e = seg["start"], seg["end"]
         if s - prev_end > 20:
-            gap_vol = rel[int(prev_end): int(s)].max() if int(s) > int(prev_end) else 0
-            mark = f" [VOL +{gap_vol:.0f} dB]" if gap_vol >= 8 else ""
-            lines.append(f"[{fmt_ts(prev_end)}] (sin habla {s - prev_end:.0f} s){mark}")
-        tags = ""
-        vol = rel[int(s): int(e) + 1].max() if int(e) + 1 > int(s) and int(s) < len(rel) else 0
-        if vol >= 6:
-            tags += f" [VOL +{vol:.0f} dB]"
+            lines.append(f"[{fmt_ts(prev_end)}] (sin habla {s - prev_end:.0f} s)")
+        tags = f" [GRITO +{sc:.0f} dB]" if sc >= 6 else ""
         if rate is not None:
             r = rate[int(s): int(e) + 10].max() if int(s) < len(rate) else 0
             if r >= 2:
