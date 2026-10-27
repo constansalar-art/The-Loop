@@ -133,22 +133,27 @@ def _filter_fullcam(vw: int, vh: int, center_x: float, src: str, out: str,
 
 
 def clip_segments(clip: dict, words: list, max_gap: float) -> list[tuple[float, float]]:
-    """Gancho (cold open) primero, si hay, y después el momento, sin silencios largos."""
+    """Gancho (cold open) primero, si hay, y después el cuerpo, sin silencios largos.
+
+    El cuerpo es start-end o, si el clip trae "segments", esa lista de tramos en orden
+    (sirve para saltear partes del medio o traer contexto de otro minuto)."""
     segs = []
     hs, he = clip.get("hook_start"), clip.get("hook_end")
     if hs is not None and he is not None and he - hs >= 0.5:
         segs.append((hs, he))
-    start, end = clip["start"], clip["end"]
-    inside = [w for w in words if w["end"] > start and w["start"] < end]
-    if not max_gap or len(inside) < 2:
-        return segs + [(start, end)]
-    # jump cuts: cortamos los huecos sin habla más largos que max_gap
-    cur = start
-    for prev, nxt in zip(inside, inside[1:]):
-        if nxt["start"] - prev["end"] > max_gap:
-            segs.append((cur, prev["end"] + 0.3))
-            cur = nxt["start"] - 0.2
-    segs.append((cur, end))
+    body = [tuple(t) for t in clip.get("segments") or [(clip["start"], clip["end"])]]
+    for start, end in body:
+        inside = [w for w in words if w["end"] > start and w["start"] < end]
+        if not max_gap or len(inside) < 2:
+            segs.append((start, end))
+            continue
+        # jump cuts: cortamos los huecos sin habla más largos que max_gap
+        cur = start
+        for prev, nxt in zip(inside, inside[1:]):
+            if nxt["start"] - prev["end"] > max_gap:
+                segs.append((cur, prev["end"] + 0.3))
+                cur = nxt["start"] - 0.2
+        segs.append((cur, end))
     return segs
 
 
