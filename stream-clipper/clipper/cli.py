@@ -84,7 +84,11 @@ def _render_all(wd: Path, cfg: dict, only: set | None, layout: str | None):
     video = Path(meta["video"])
     sel_path = wd / "selection.json"
     clips = read_json(sel_path)["clips"]
-    words = [w for seg in read_json(wd / "transcript.json")["segments"] for w in seg["words"]]
+    words = []
+    for seg in read_json(wd / "transcript.json")["segments"]:
+        if seg["words"]:
+            seg["words"][-1]["eos"] = True  # fin de frase: ahí se puede cortar
+        words += seg["words"]
     out_dir = wd / "clips"
     out_dir.mkdir(exist_ok=True)
 

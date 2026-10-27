@@ -132,27 +132,74 @@ def _filter_fullcam(vw: int, vh: int, center_x: float, src: str, out: str,
     return graph, (H + fh) // 2 + 110
 
 
+PAD = 0.35         # silencio que se deja antes y después de cada tramo
+PHRASE_GAP = 0.45  # pausa que cuenta como fin de frase aunque no haya puntuación
+MAX_EXTEND = 4.0   # cuánto se puede estirar un tramo para completar una frase
+
+
+def _ends_phrase(words: list, i: int) -> bool:
+    """La palabra i cierra una frase: termina en puntuación o le sigue una pausa."""
+    if words[i].get("eos") or words[i]["word"][-1:] in ".?!…":
+        return True
+    return i + 1 >= len(words) or words[i + 1]["start"] - words[i]["end"] > PHRASE_GAP
+
+
+def tidy_segment(start: float, end: float, words: list) -> tuple[float, float]:
+    """Ajusta un tramo a frases completas y le deja un respiro de silencio a cada lado.
+
+    Si el tramo arranca o termina a mitad de frase, lo extiende hasta el borde de la frase
+    (máximo MAX_EXTEND s); si no llega, retrocede al borde de frase anterior en vez de dejarla
+    cortada. Después agrega PAD de silencio sin pisar a quien habla antes o después."""
+    idx = [i for i, w in enumerate(words) if start <= (w["start"] + w["end"]) / 2 <= end]
+    if not idx:
+        return start, end
+    first, last = idx[0], idx[-1]
+    f = first
+    while f > 0 and not _ends_phrase(words, f - 1) and start - words[f - 1]["start"] < MAX_EXTEND:
+        f -= 1
+    if f == 0 or _ends_phrase(words, f - 1):
+        first = f
+    else:  # no se encontró el inicio de la frase: arrancamos en la frase siguiente
+        while first < last and not _ends_phrase(words, first - 1):
+            first += 1
+    l = last
+    while l + 1 < len(words) and not _ends_phrase(words, l) and words[l + 1]["end"] - end < MAX_EXTEND:
+        l += 1
+    if _ends_phrase(words, l):
+        last = l
+    else:  # no se llega al final de la frase: cortamos en el final de la frase anterior
+        while last > first and not _ends_phrase(words, last):
+            last -= 1
+    prev_end = words[first - 1]["end"] if first > 0 else 0.0
+    next_start = words[last + 1]["start"] if last + 1 < len(words) else words[last]["end"] + 5
+    new_start = max(words[first]["start"] - PAD, (prev_end + words[first]["start"]) / 2)
+    new_end = min(words[last]["end"] + PAD, (words[last]["end"] + next_start) / 2)
+    return round(new_start, 2), round(new_end, 2)
+
+
 def clip_segments(clip: dict, words: list, max_gap: float) -> list[tuple[float, float]]:
     """Gancho (cold open) primero, si hay, y después el cuerpo, sin silencios largos.
 
     El cuerpo es start-end o, si el clip trae "segments", esa lista de tramos en orden
-    (sirve para saltear partes del medio o traer contexto de otro minuto)."""
+    (sirve para saltear partes del medio o traer contexto de otro minuto). Todos los
+    tramos se ajustan a frases completas con un respiro de silencio en cada corte."""
     segs = []
     hs, he = clip.get("hook_start"), clip.get("hook_end")
     if hs is not None and he is not None and he - hs >= 0.5:
-        segs.append((hs, he))
+        segs.append(tidy_segment(hs, he, words))
     body = [tuple(t) for t in clip.get("segments") or [(clip["start"], clip["end"])]]
     for start, end in body:
+        start, end = tidy_segment(start, end, words)
         inside = [w for w in words if w["end"] > start and w["start"] < end]
         if not max_gap or len(inside) < 2:
             segs.append((start, end))
             continue
-        # jump cuts: cortamos los huecos sin habla más largos que max_gap
+        # jump cuts: cortamos los huecos sin habla más largos que max_gap, dejando respiro
         cur = start
         for prev, nxt in zip(inside, inside[1:]):
             if nxt["start"] - prev["end"] > max_gap:
-                segs.append((cur, prev["end"] + 0.3))
-                cur = nxt["start"] - 0.2
+                segs.append((cur, prev["end"] + PAD))
+                cur = nxt["start"] - PAD
         segs.append((cur, end))
     return segs
 
