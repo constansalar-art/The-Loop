@@ -15,6 +15,8 @@ HALLUCINATIONS = (
     "suscribete",
 )
 
+CHUNK_SECONDS = 1800
+
 
 def _resolve(cfg: dict) -> tuple[str, str, str]:
     device = cfg["device"]
@@ -34,36 +36,44 @@ def _resolve(cfg: dict) -> tuple[str, str, str]:
 def _run(wav: Path, model_name: str, device: str, compute: str, language: str) -> list:
     from faster_whisper import WhisperModel
 
-    # Leemos el WAV nosotros (16 kHz mono): evita depender de PyAV, que cambia su API seguido.
-    with wave.open(str(wav), "rb") as w:
-        audio = np.frombuffer(w.readframes(w.getnframes()), dtype=np.int16)
-    audio = audio.astype(np.float32) / 32768.0
-
     model = WhisperModel(model_name, device=device, compute_type=compute)
-    segments, info = model.transcribe(
-        audio, language=language, vad_filter=True, word_timestamps=True,
-        beam_size=5 if device == "cuda" else 1, condition_on_previous_text=False,
-    )
     result = []
     t0 = last_report = time.time()
-    for seg in segments:  # la transcripción real ocurre mientras se itera
-        text = seg.text.strip()
-        if not text or any(h in text.lower() for h in HALLUCINATIONS):
-            continue
-        result.append({
-            "start": round(seg.start, 2),
-            "end": round(seg.end, 2),
-            "text": text,
-            "words": [
-                {"start": round(w.start, 2), "end": round(w.end, 2), "word": w.word.strip()}
-                for w in (seg.words or []) if w.word.strip()
-            ],
-        })
-        if time.time() - last_report > 30:
-            last_report = time.time()
-            pct = 100 * seg.end / max(info.duration, 1)
-            log(f"  {fmt_ts(seg.end)} / {fmt_ts(info.duration)} ({pct:.0f}%) "
-                f"- {(time.time() - t0) / 60:.1f} min")
+    # Leemos el WAV nosotros (16 kHz mono): evita depender de PyAV, que cambia su API seguido.
+    # Por partes de 30 min: una VOD de 4-5 h entera (con VAD y timestamps por palabra) supera
+    # los 12 GB de RAM.
+    with wave.open(str(wav), "rb") as w:
+        sr = w.getframerate()
+        total = w.getnframes() / sr
+        offset = 0.0
+        while offset < total:
+            w.setpos(int(offset * sr))
+            audio = np.frombuffer(w.readframes(int(CHUNK_SECONDS * sr)), dtype=np.int16)
+            audio = audio.astype(np.float32) / 32768.0
+            segments, _ = model.transcribe(
+                audio, language=language, vad_filter=True, word_timestamps=True,
+                beam_size=5 if device == "cuda" else 1, condition_on_previous_text=False,
+            )
+            for seg in segments:  # la transcripción real ocurre mientras se itera
+                text = seg.text.strip()
+                if not text or any(h in text.lower() for h in HALLUCINATIONS):
+                    continue
+                result.append({
+                    "start": round(offset + seg.start, 2),
+                    "end": round(offset + seg.end, 2),
+                    "text": text,
+                    "words": [
+                        {"start": round(offset + x.start, 2), "end": round(offset + x.end, 2),
+                         "word": x.word.strip()}
+                        for x in (seg.words or []) if x.word.strip()
+                    ],
+                })
+                if time.time() - last_report > 30:
+                    last_report = time.time()
+                    done = offset + seg.end
+                    log(f"  {fmt_ts(done)} / {fmt_ts(total)} ({100 * done / max(total, 1):.0f}%) "
+                        f"- {(time.time() - t0) / 60:.1f} min")
+            offset += CHUNK_SECONDS
     return result
 
 
