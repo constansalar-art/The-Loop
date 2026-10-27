@@ -1,5 +1,4 @@
 """Detección de layout (facecam+juego vs full cam) y render vertical 1080x1920 con ffmpeg."""
-import os
 import shutil
 from pathlib import Path
 
@@ -232,23 +231,32 @@ def render_clip(video: Path | str, info: dict, clip: dict, words: list, out_dir:
     start, end = clip["start"], clip["end"]
     if clip.get("gameplay"):  # recorte del juego distinto para este clip
         cfg = {**cfg, "layout": {**cfg["layout"], "gameplay": clip["gameplay"]}}
+    if clip.get("layout_cfg"):  # cualquier otro ajuste de layout solo para este clip
+        cfg = {**cfg, "layout": {**cfg["layout"], **clip["layout_cfg"]}}
     mode = force_layout or (clip.get("layout") if clip.get("layout") in ("split", "fullcam") else None)
     if not mode and cfg["layout"]["mode"] in ("split", "fullcam"):
         mode = cfg["layout"]["mode"]
-    center = 0.5
-    if mode != "split":
+    center = clip.get("center_x", 0.5)  # centro horizontal del recorte, fijado a mano si hace falta
+    if mode != "split" and not (mode and "center_x" in clip):
         # si la fuente es un link, la detección usa la copia liviana local (meta "preview")
         detected, center = detect_layout(Path(info.get("preview") or video), start, end, cfg)
         mode = mode or detected
 
     segs = clip_segments(clip, words, clip.get("cut_silences", cfg["render"].get("cut_silences", 0)))
+    # cada tramo dura un número entero de cuadros (30 fps): si no, el redondeo de cada corte
+    # se acumula y los subtítulos se van desfasando a lo largo del clip
+    segs = [(a, a + max(1, round((b - a) * 30)) / 30) for a, b in segs]
     total = sum(e - s for s, e in segs)
     vw, vh = info["width"], info["height"]
     parts, inputs = [], []
     for i, (s, e) in enumerate(segs):
-        if isinstance(video, str):  # link HLS: ffmpeg lee solo estos segundos
-            ca = os.environ.get("SSL_CERT_FILE")
-            inputs += (["-ca_file", ca] if ca else []) + ["-ss", f"{s:.3f}", "-t", f"{e - s:.3f}", "-i", video]
+        if isinstance(video, str):  # fuente remota: bajamos solo este tramo, cortado exacto
+            from .media import fetch_section
+            wav = Path(info["audio"]) if info.get("audio") else None
+            part, part_start = fetch_section(info["source"], s, e, out_dir.parent / "_cache",
+                                             cfg["render"]["max_height"], wav)
+            offset = max(0.0, s - part_start)  # dónde cae el tramo dentro del archivo bajado
+            inputs += ["-ss", f"{offset:.3f}", "-t", f"{e - s:.3f}", "-i", part.resolve()]
         else:
             inputs += ["-ss", f"{s:.3f}", "-t", f"{e - s:.3f}", "-i", video.resolve()]
         bh = cfg["brand"]["height"] if cfg["brand"]["enabled"] else 0
@@ -262,8 +270,12 @@ def render_clip(video: Path | str, info: dict, clip: dict, words: list, out_dir:
             band = cfg["brand"]["band_height"]
             badge_y, sub_y, title_y = game_y - band + (band - bh) // 2, game_y + 70, game_y + 170
         # mismo fps en todos los segmentos para que concat no falle
-        parts.append(g + f";[v{i}]fps=30[v{i}f]")
-    concat_in = "".join(f"[v{i}f][{i}:a]" for i in range(len(segs)))
+        # mismo fps y largo exacto en cuadros/muestras: si un tramo queda un cuadro más largo,
+        # concat rellena el audio con silencio y se acumula desfase en cada corte
+        frames = max(1, round((e - s) * 30))
+        parts.append(g + f";[v{i}]fps=30,trim=end_frame={frames},setpts=PTS-STARTPTS[v{i}f]"
+                         f";[{i}:a]atrim=duration={frames / 30:.4f},asetpts=PTS-STARTPTS[a{i}f]")
+    concat_in = "".join(f"[v{i}f][a{i}f]" for i in range(len(segs)))
     graph = ";".join(parts) + f";{concat_in}concat=n={len(segs)}:v=1:a=1[base][acat]"
 
     tmp = out_dir / "_tmp"
