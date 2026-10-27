@@ -36,6 +36,10 @@ facecam_height = 0.38
 gameplay_fit = "cover"
 # Si la cara detectada ocupa más que esta fracción de la altura del frame -> full cam.
 fullcam_face_min_height = 0.16
+# Escenas de cámara completa con varias personas o banners: zona a usar [x, y, ancho, alto]
+# y proporción del recorte (1.0 = cuadrado). Comentado = recorte vertical 9:16 a la cara.
+# fullcam_rect = [0.0, 0.18, 1.0, 0.66]
+# fullcam_aspect = 1.0
 
 [subtitles]
 font = "Arial Black"

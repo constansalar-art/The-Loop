@@ -68,10 +68,28 @@ def _filter_split(vw: int, vh: int, cfg: dict, src: str, out: str) -> tuple[str,
     return f"{cam};{game};[cam{n}][game{n}]vstack=inputs=2[{out}]", top
 
 
-def _filter_fullcam(vw: int, vh: int, center_x: float, src: str, out: str) -> str:
-    cw = min(_even(vh * 9 / 16), _even(vw))
-    cx = min(max(_even(center_x * vw - cw / 2), 0), vw - cw)
-    return f"[{src}]crop={cw}:{vh}:{cx}:0,scale={W}:{H},setsar=1[{out}]"
+def _filter_fullcam(vw: int, vh: int, center_x: float, src: str, out: str,
+                    cfg: dict) -> tuple[str, int]:
+    """Cámara completa. Sin fullcam_rect: recorte vertical 9:16 centrado en la cara.
+    Con fullcam_rect: recorta esa zona (p. ej. sin banners) con la proporción fullcam_aspect,
+    centrada en las caras, sobre fondo desenfocado. Sirve para escenas con varias personas."""
+    lay = cfg["layout"]
+    rect = lay.get("fullcam_rect")
+    if not rect:
+        cw = min(_even(vh * 9 / 16), _even(vw))
+        cx = min(max(_even(center_x * vw - cw / 2), 0), vw - cw)
+        return f"[{src}]crop={cw}:{vh}:{cx}:0,scale={W}:{H},setsar=1[{out}]", int(H * 0.66)
+    rw, rh, rx, ry = _rect_px(rect, vw, vh)
+    aspect = lay.get("fullcam_aspect", 1.0)
+    cw = min(_even(rh * aspect), rw)
+    cx = min(max(_even(center_x * vw - cw / 2), rx), rx + rw - cw)
+    fh = _even(W / (cw / rh))
+    n = out
+    graph = (f"[{src}]crop={cw}:{rh}:{cx}:{ry},split[f1{n}][f2{n}];"
+             f"[f1{n}]scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},"
+             f"boxblur=30:3[fb{n}];[f2{n}]scale={W}:{fh}[ff{n}];"
+             f"[fb{n}][ff{n}]overlay=0:(H-h)/2,setsar=1[{out}]")
+    return graph, (H + fh) // 2 + 110
 
 
 def clip_segments(clip: dict, words: list, max_gap: float) -> list[tuple[float, float]]:
@@ -125,8 +143,8 @@ def render_clip(video: Path, info: dict, clip: dict, words: list, out_dir: Path,
     for i, (s, e) in enumerate(segs):
         inputs += ["-ss", f"{s:.3f}", "-t", f"{e - s:.3f}", "-i", video.resolve()]
         if mode == "fullcam":
-            g = _filter_fullcam(vw, vh, center, f"{i}:v", f"v{i}")
-            sub_y, title_y = int(H * 0.66), 230
+            g, sub_y = _filter_fullcam(vw, vh, center, f"{i}:v", f"v{i}", cfg)
+            title_y = 230
         else:
             g, top = _filter_split(vw, vh, cfg, f"{i}:v", f"v{i}")
             # subtítulos en la unión cam/juego, título debajo para no tapar la cara
