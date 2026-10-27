@@ -40,7 +40,7 @@ ScaledBorderAndShadow: yes
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
 Style: Sub,{s['font']},{s['size']},&H00FFFFFF,&H00FFFFFF,&H00000000,&H90000000,-1,0,0,0,100,100,0,0,1,7,3,5,70,70,0,1
-Style: Title,{s['font']},{s['title_size']},&H00000000,&H00000000,{s['title_box']},&H64000000,-1,0,0,0,100,100,0,0,3,22,9,8,80,80,230,1
+Style: Title,{s['title_font']},{s['title_size']},{s['title_color']},&H00000000,{s['title_outline']},&H5A000000,0,0,0,0,100,100,1,0,1,{s['title_outline_width']},7,8,80,80,230,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text

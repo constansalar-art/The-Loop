@@ -1,4 +1,5 @@
 """Detección de layout (facecam+juego vs full cam) y render vertical 1080x1920 con ffmpeg."""
+import shutil
 from pathlib import Path
 
 from .censor import Censor, audio_filter
@@ -267,7 +268,12 @@ def render_clip(video: Path, info: dict, clip: dict, words: list, out_dir: Path,
     title_dur = segs[0][1] - segs[0][0] if has_hook else None
     ass = build_ass(clip_words, 0.0, total, clip["title"], sub_y, title_y, cfg, title_dur)
     (tmp / ass_name).write_text(ass, encoding="utf-8")
-    graph += (f";[base]ass={ass_name}[v];[acat]loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000[an];"
+    # tipografías del proyecto: se copian al lado del .ass para pasarlas sin rutas (Windows)
+    (tmp / "fonts").mkdir(exist_ok=True)
+    for folder in (Path(__file__).resolve().parent.parent / "fonts", Path(cfg.get("_root", ".")) / "fonts"):
+        for f in folder.glob("*.[ot]tf") if folder.is_dir() else []:
+            shutil.copy(f, tmp / "fonts" / f.name)
+    graph += (f";[base]ass={ass_name}:fontsdir=fonts[v];[acat]loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000[an];"
               + audio_filter(bleeps, censor.mode, "an", "a"))
 
     out = out_dir / f"{clip['id']:02d}_{slugify(clip['title'])}.mp4"

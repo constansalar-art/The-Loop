@@ -47,8 +47,12 @@ size = 82
 words_per_chunk = 3
 uppercase = true
 title_seconds = 3         # si el clip no tiene gancho: cuánto se ve el título (0 = todo el clip)
-title_size = 74
-title_box = "&H0000D7FF"    # color de la caja del título (formato ASS &HBBGGRR: amarillo)
+title_font = "Luckiest Guy"   # tipografía del título (las de la carpeta fonts/ o instaladas)
+title_size = 96
+# Colores en formato ASS &H00BBGGRR. Letra negra con borde grueso amarillo siguiendo la forma.
+title_color = "&H00000000"
+title_outline = "&H0000D7FF"
+title_outline_width = 12
 
 [render]
 encoder = "libx264"       # usá "h264_nvenc" si tenés NVIDIA (mucho más rápido)
