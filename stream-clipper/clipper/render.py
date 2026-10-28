@@ -196,7 +196,7 @@ def clip_segments(clip: dict, words: list, max_gap: float) -> list[tuple[float, 
     hs, he = clip.get("hook_start"), clip.get("hook_end")
     if hs is not None and he is not None and he - hs >= 0.5:
         segs.append(tidy_segment(hs, he, words))
-    body = [tuple(t) for t in clip.get("segments") or [(clip["start"], clip["end"])]]
+    body = [(t[0], t[1]) for t in clip.get("segments") or [(clip["start"], clip["end"])]]
     for start, end in body:
         start, end = tidy_segment(start, end, words)
         inside = [w for w in words if w["end"] > start and w["start"] < end]
@@ -247,6 +247,20 @@ def render_clip(video: Path | str, info: dict, clip: dict, words: list, out_dir:
     # se acumula y los subtítulos se van desfasando a lo largo del clip
     segs = [(a, a + max(1, round((b - a) * 30)) / 30) for a, b in segs]
     total = sum(e - s for s, e in segs)
+    # ajustes de layout por tramo: "segments": [[a, b, {"fullcam_rect": [...]}], ...] y
+    # "hook_layout_cfg" para el gancho (sirve cuando la escena cambia a mitad del clip).
+    # Conviene usar el mismo fullcam_aspect en todos, así el cartel y los subtítulos no se mueven.
+    seg_cfgs = []
+    has_hook_seg = clip.get("hook_start") is not None and clip.get("hook_end") is not None
+    for i, (s, e) in enumerate(segs):
+        extra = None
+        if i == 0 and has_hook_seg:
+            extra = clip.get("hook_layout_cfg")
+        else:
+            mid = (s + e) / 2
+            extra = next((t[2] for t in clip.get("segments") or []
+                          if len(t) > 2 and t[0] - 1 <= mid <= t[1] + 1), None)
+        seg_cfgs.append({**cfg, "layout": {**cfg["layout"], **extra}} if extra else cfg)
     vw, vh = info["width"], info["height"]
     parts, inputs = [], []
     for i, (s, e) in enumerate(segs):
@@ -261,11 +275,11 @@ def render_clip(video: Path | str, info: dict, clip: dict, words: list, out_dir:
             inputs += ["-ss", f"{s:.3f}", "-t", f"{e - s:.3f}", "-i", video.resolve()]
         bh = cfg["brand"]["height"] if cfg["brand"]["enabled"] else 0
         if mode == "fullcam":
-            g, below = _filter_fullcam(vw, vh, center, f"{i}:v", f"v{i}", cfg)
+            g, below = _filter_fullcam(vw, vh, center, f"{i}:v", f"v{i}", seg_cfgs[i])
             # cartel justo debajo de la imagen (zona desenfocada) y subtítulos debajo
             badge_y, sub_y, title_y = below - 90, below - 90 + bh + 70, 230
         else:
-            g, game_y = _filter_split(vw, vh, cfg, f"{i}:v", f"v{i}")
+            g, game_y = _filter_split(vw, vh, seg_cfgs[i], f"{i}:v", f"v{i}")
             # cartel centrado en su franja; subtítulos y título arriba del juego
             band = cfg["brand"]["band_height"]
             badge_y, sub_y, title_y = game_y - band + (band - bh) // 2, game_y + 70, game_y + 170
