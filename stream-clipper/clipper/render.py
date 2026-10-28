@@ -186,6 +186,15 @@ def tidy_segment(start: float, end: float, words: list) -> tuple[float, float]:
     return round(new_start, 2), round(new_end, 2)
 
 
+def _cut(start: float, end: float, words: list, clip: dict) -> tuple[float, float]:
+    """Con "exact_cuts" se respetan los cortes elegidos a mano (ya caen entre palabras): solo se
+    agrega un respiro corto. Sirve cuando Whisper arma frases muy largas y ajustar a fin de
+    frase alargaría el clip de más."""
+    if clip.get("exact_cuts"):
+        return max(0.0, start - 0.12), end + 0.2
+    return tidy_segment(start, end, words)
+
+
 def clip_segments(clip: dict, words: list, max_gap: float) -> list[tuple[float, float]]:
     """Gancho (cold open) primero, si hay, y después el cuerpo, sin silencios largos.
 
@@ -195,10 +204,10 @@ def clip_segments(clip: dict, words: list, max_gap: float) -> list[tuple[float, 
     segs = []
     hs, he = clip.get("hook_start"), clip.get("hook_end")
     if hs is not None and he is not None and he - hs >= 0.5:
-        segs.append(tidy_segment(hs, he, words))
+        segs.append(_cut(hs, he, words, clip))
     body = [(t[0], t[1]) for t in clip.get("segments") or [(clip["start"], clip["end"])]]
     for start, end in body:
-        start, end = tidy_segment(start, end, words)
+        start, end = _cut(start, end, words, clip)
         inside = [w for w in words if w["end"] > start and w["start"] < end]
         if not max_gap or len(inside) < 2:
             segs.append((start, end))
