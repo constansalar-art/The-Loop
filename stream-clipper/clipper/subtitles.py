@@ -53,6 +53,12 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         # "pop" de entrada: crece rápido, rebota apenas y queda levemente inclinado
         anim = ("\\fscx40\\fscy40\\t(0,170,\\fscx110\\fscy110)"
                 "\\t(170,280,\\fscx100\\fscy100)\\frz-2")
+        if s.get("title_two_tone"):
+            # estilo TikTok: blanco y la segunda mitad en amarillo, sin inclinar, se desvanece
+            tw = text.split()
+            half = max(1, len(tw) // 2)
+            text = "{\\b1}" + " ".join(tw[:half]) + "\\N{\\c&H00D7FF&}" + " ".join(tw[half:])
+            anim = "\\fad(120,300)"
         events.append(f"Dialogue: 1,{_ts(0)},{_ts(t_end)},Title,,0,0,0,,"
                       f"{{\\an8\\pos({W // 2},{title_y}){anim}}}{text}")
 

@@ -20,11 +20,18 @@ def make_badge(cfg: dict, out_png: Path) -> tuple[int, int]:
     icon.putalpha(mask)
 
     gap = height // 4
-    width = height + gap + (right - left)
+    pad = height // 3 if b.get("pill") else 0  # pastilla oscura detrás (estilo TikTok)
+    width = height + gap + (right - left) + 2 * pad
     img = Image.new("RGBA", (width, height), (0, 0, 0, 0))
-    img.paste(icon, (0, 0), icon)
+    if pad:
+        ImageDraw.Draw(img).rounded_rectangle((0, 0, width - 1, height - 1), radius=height // 2,
+                                              fill=(0, 0, 0, 170))
+        icon = icon.resize((int(height * 0.7),) * 2, Image.LANCZOS)
+        img.paste(icon, (pad, (height - icon.height) // 2), icon)
+    else:
+        img.paste(icon, (0, 0), icon)
     text_y = (height - (bottom - top)) // 2 - top
-    ImageDraw.Draw(img).text((height + gap - left, text_y), text, font=font, fill=b["color"],
-                             stroke_width=b["stroke"], stroke_fill="#000000")
+    ImageDraw.Draw(img).text((pad + height + gap - left, text_y), text, font=font, fill=b["color"],
+                             stroke_width=0 if pad else b["stroke"], stroke_fill="#000000")
     img.save(out_png)
     return width, height

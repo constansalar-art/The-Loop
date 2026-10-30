@@ -76,3 +76,12 @@ band_color = "0x0b0b0b"
 enabled = true
 audio = "beep"            # beep (pitido) | mute (silencio)
 # words = ["put[oa]s?", "mierdas?"]   # opcional: tu propia lista (regex por palabra entera)
+
+[style]
+# "classic": cámara completa con fondo desenfocado y título grande con borde amarillo.
+# "tiktok": la cámara llena toda la pantalla encuadrada en la cara, título chico arriba
+# (blanco + amarillo, se desvanece), subtítulos de 2 palabras y cartel tipo pastilla.
+# Para "tiktok" conviene: [subtitles] size = 104, words_per_chunk = 2, title_font = "Arial Black",
+# title_size = 92, title_color = "&H00FFFFFF", title_outline = "&H00000000",
+# title_outline_width = 6, title_two_tone = true; [brand] height = 60, pill = true
+mode = "classic"

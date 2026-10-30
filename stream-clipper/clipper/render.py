@@ -117,6 +117,52 @@ def _filter_split(vw: int, vh: int, cfg: dict, src: str, out: str) -> tuple[str,
     return f"{cam};{game};[cam{n}][game{n}]vstack=inputs=2[{out}]", top
 
 
+def face_box(video: Path, start: float, end: float) -> tuple[float, float, float] | None:
+    """Mediana de las caras en el tramo: (centro x, centro y, alto), en fracciones del frame."""
+    import cv2
+
+    cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
+    cap = cv2.VideoCapture(str(video))
+    xs, ys, hs = [], [], []
+    for i in range(6):
+        cap.set(cv2.CAP_PROP_POS_MSEC, (start + (end - start) * (i + 0.5) / 6) * 1000)
+        ok, frame = cap.read()
+        if not ok:
+            continue
+        scale = 640 / frame.shape[1]
+        gray = cv2.cvtColor(cv2.resize(frame, None, fx=scale, fy=scale), cv2.COLOR_BGR2GRAY)
+        for x, y, w, h in cascade.detectMultiScale(gray, 1.1, 6, minSize=(24, 24)):
+            xs.append((x + w / 2) / gray.shape[1])
+            ys.append((y + h / 2) / gray.shape[0])
+            hs.append(h / gray.shape[0])
+    cap.release()
+    if not xs:
+        return None
+    med = lambda v: sorted(v)[len(v) // 2]
+    return med(xs), med(ys), med(hs)
+
+
+def _filter_fill(vw: int, vh: int, box: tuple | None, center_x: float, src: str, out: str,
+                 cfg: dict) -> str:
+    """Estilo TikTok: la cámara llena toda la pantalla vertical (recorte 9:16 sin fondo
+    desenfocado), encuadrado en las caras de ese tramo: la cara queda en el tercio de arriba,
+    como en un video grabado con el celu. Nunca sale de fullcam_rect (banners afuera)."""
+    rect = cfg["layout"].get("fullcam_rect") or [0, 0, 1, 1]
+    rw, rh, rx, ry = _rect_px(rect, vw, vh)
+    rh = min(rh, vh - ry)
+    ch = rh
+    cy = ry
+    if box:
+        fx, fy, fh = box
+        center_x = fx
+        # alto del recorte: unas 5 caras de alto (plano medio), sin acercar de más
+        ch = _even(min(rh, max(fh * vh * 5, vh * 0.62)))
+        cy = int(min(max(fy * vh - ch * 0.38, ry), ry + rh - ch))
+    cw = min(_even(ch * 9 / 16), rw)
+    cx = min(max(_even(center_x * vw - cw / 2), rx), rx + rw - cw)
+    return f"[{src}]crop={cw}:{ch}:{cx}:{cy},scale={W}:{H},setsar=1[{out}]"
+
+
 def _filter_fullcam(vw: int, vh: int, center_x: float, src: str, out: str,
                     cfg: dict) -> tuple[str, int]:
     """Cámara completa. Sin fullcam_rect: recorte vertical 9:16 centrado en la cara.
@@ -302,6 +348,7 @@ def render_clip(video: Path | str, info: dict, clip: dict, words: list, out_dir:
                           if len(t) > 2 and t[0] - 1 <= mid <= t[1] + 1), None)
         seg_cfgs.append({**cfg, "layout": {**cfg["layout"], **extra}} if extra else cfg)
     vw, vh = info["width"], info["height"]
+    tiktok = cfg.get("style", {}).get("mode") == "tiktok"
     parts, inputs = [], []
     for i, (s, e) in enumerate(segs):
         if isinstance(video, str):  # fuente remota: bajamos solo este tramo, cortado exacto
@@ -314,7 +361,12 @@ def render_clip(video: Path | str, info: dict, clip: dict, words: list, out_dir:
         else:
             inputs += ["-ss", f"{s:.3f}", "-t", f"{e - s:.3f}", "-i", video.resolve()]
         bh = cfg["brand"]["height"] if cfg["brand"]["enabled"] else 0
-        if mode == "fullcam":
+        if mode == "fullcam" and tiktok:
+            # cada tramo se centra en las caras de ese tramo (como cambiar de plano)
+            box = None if clip.get("center_x") else face_box(Path(info.get("preview") or video), s, e)
+            g = _filter_fill(vw, vh, box, center, f"{i}:v", f"v{i}", seg_cfgs[i])
+            badge_y, sub_y, title_y = 120, int(H * 0.63), 250
+        elif mode == "fullcam":
             g, below = _filter_fullcam(vw, vh, center, f"{i}:v", f"v{i}", seg_cfgs[i])
             # cartel justo debajo de la imagen (zona desenfocada) y subtítulos debajo
             badge_y, sub_y, title_y = below - 90, below - 90 + bh + 70, 230
