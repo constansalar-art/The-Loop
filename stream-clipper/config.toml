@@ -1,0 +1,78 @@
+# Configuración de stream-clipper. Todo es opcional: lo que borres toma el valor por defecto.
+
+[general]
+# Contexto del canal para que Claude entienda qué es un "buen momento".
+channel_context = """
+Streamer argentino en Kick. Contenido: apuestas en casinos online (slots) y just chatting.
+Los mejores momentos suelen ser: reacciones exageradas a ganancias o pérdidas grandes,
+gritos, bronca y enojos, festejos, momentos graciosos con el chat, historias o charlas con remate.
+"""
+language = "es"
+num_clips = 10            # cuántos clips proponer (después elegís vos cuáles subir)
+min_clip_seconds = 15
+max_clip_seconds = 30
+use_chat = false          # chat de Kick (experimental: scrapea esquivando su anti-bot, no recomendado)
+
+[whisper]
+# "auto" = large-v3-turbo si hay GPU NVIDIA, "small" si es solo CPU.
+# Opciones: tiny, base, small, medium, large-v3, large-v3-turbo
+model = "auto"
+device = "auto"           # auto | cuda | cpu
+
+[claude]
+model = "claude-opus-5-5"
+effort = "high"           # low | medium | high (más alto = mejor selección, más caro)
+
+[layout]
+# "auto" detecta por clip si es facecam+juego o full cam. También: "split" o "fullcam".
+mode = "auto"
+# Rectángulos en fracciones del frame original: [x, y, ancho, alto], de 0 a 1.
+# Calibralos con:  python -m clipper frame <video o link> --at 00:30:00
+facecam = [0.72, 0.62, 0.28, 0.38]
+gameplay = [0.18, 0.0, 0.54, 1.0]
+# Parte de la altura del vertical que ocupa la facecam (el resto es el juego).
+facecam_height = 0.38
+# "cover" llena el espacio recortando los costados; "fit" muestra todo con fondo desenfocado.
+gameplay_fit = "cover"
+# Si la cara detectada ocupa más que esta fracción de la altura del frame -> full cam.
+fullcam_face_min_height = 0.16
+# Escenas de cámara completa con varias personas o banners: zona a usar [x, y, ancho, alto]
+# y proporción del recorte (1.0 = cuadrado). Comentado = recorte vertical 9:16 a la cara.
+# fullcam_rect = [0.0, 0.18, 1.0, 0.66]
+# fullcam_aspect = 1.0
+
+[subtitles]
+font = "Arial Black"
+size = 82
+words_per_chunk = 3
+uppercase = true
+title_seconds = 3         # si el clip no tiene gancho: cuánto se ve el título (0 = todo el clip)
+title_font = "Luckiest Guy"   # tipografía del título (las de la carpeta fonts/ o instaladas)
+title_size = 96
+# Colores en formato ASS &H00BBGGRR. Letra negra con borde grueso amarillo siguiendo la forma.
+title_color = "&H00000000"
+title_outline = "&H0000D7FF"
+title_outline_width = 12
+
+[render]
+encoder = "libx264"       # usá "h264_nvenc" si tenés NVIDIA (mucho más rápido)
+crf = 20
+max_height = 1080         # calidad máxima al descargar la VOD
+cut_silences = 2.5        # corta pausas sin habla de más de N segundos entre frases (0 = no cortar)
+
+[brand]
+# Cartel del canal en todos los clips (logo + dirección). No tapa el video: en los clips de juego
+# va en una franja propia entre la cámara y el juego; en cámara completa, debajo de la imagen.
+enabled = true
+text = "kick.com/dramacer0"
+color = "#53FC18"          # verde Kick
+icon = "assets/kick-icon.png"
+font_file = "Anton.ttf"    # tipografía del cartel (carpeta fonts/)
+height = 64                # alto del cartel en px (el video mide 1080x1920)
+band_height = 96           # alto de la franja entre cámara y juego
+band_color = "0x0b0b0b"
+
+[censor]
+enabled = true
+audio = "beep"            # beep (pitido) | mute (silencio)
+# words = ["put[oa]s?", "mierdas?"]   # opcional: tu propia lista (regex por palabra entera)
