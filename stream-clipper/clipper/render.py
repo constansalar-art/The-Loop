@@ -142,8 +142,9 @@ def _filter_fullcam(vw: int, vh: int, center_x: float, src: str, out: str,
 
 
 PAD = 0.35         # silencio que se deja antes y después de cada tramo
-PHRASE_GAP = 0.45  # pausa que cuenta como fin de frase aunque no haya puntuación
+PHRASE_GAP = 0.6   # pausa que cuenta como fin de frase aunque no haya puntuación
 MAX_EXTEND = 4.0   # cuánto se puede estirar un tramo para completar una frase
+MERGE_GAP = 6.0    # dos tramos separados por menos que esto se unen (menos cortes)
 
 
 def _ends_phrase(words: list, i: int) -> bool:
@@ -191,11 +192,38 @@ def _cut(start: float, end: float, words: list, clip: dict) -> tuple[float, floa
     agrega un respiro corto. Sirve cuando Whisper arma frases muy largas y ajustar a fin de
     frase alargaría el clip de más."""
     if clip.get("exact_cuts"):
+        # igual dejamos terminar la frase si el final está cerca
+        idx = [i for i, w in enumerate(words) if start <= (w["start"] + w["end"]) / 2 <= end]
+        if idx:
+            l = idx[-1]
+            while (l + 1 < len(words) and not _ends_phrase(words, l)
+                   and words[l + 1]["end"] - end < 1.5):
+                l += 1
+            if _ends_phrase(words, l):
+                end = max(end, words[l]["end"])
         return max(0.0, start - 0.12), end + 0.2
     return tidy_segment(start, end, words)
 
 
-def clip_segments(clip: dict, words: list, max_gap: float) -> list[tuple[float, float]]:
+def _merge_close(body: list, max_body: float) -> list:
+    """Une tramos consecutivos separados por poco (MERGE_GAP), empezando por los huecos más
+    chicos, mientras el clip no pase de max_body: cada corte que se evita es un salto menos."""
+    body = list(body)
+    while len(body) > 1:
+        total = sum(e - s for s, e in body)
+        gaps = [(body[i + 1][0] - body[i][1], i) for i in range(len(body) - 1)
+                if body[i + 1][0] >= body[i][0] and body[i + 1][0] - body[i][1] <= MERGE_GAP]
+        # tramos que se pisan (el ajuste a frase los superpuso) se unen siempre
+        gaps = [(g, i) for g, i in gaps if g <= 0 or total + g <= max_body]
+        if not gaps:
+            break
+        _, i = min(gaps)
+        body[i:i + 2] = [(body[i][0], max(body[i][1], body[i + 1][1]))]
+    return body
+
+
+def clip_segments(clip: dict, words: list, max_gap: float,
+                  max_total: float = 29.5) -> list[tuple[float, float]]:
     """Gancho (cold open) primero, si hay, y después el cuerpo, sin silencios largos.
 
     El cuerpo es start-end o, si el clip trae "segments", esa lista de tramos en orden
@@ -206,16 +234,18 @@ def clip_segments(clip: dict, words: list, max_gap: float) -> list[tuple[float, 
     if hs is not None and he is not None and he - hs >= 0.5:
         segs.append(_cut(hs, he, words, clip))
     body = [(t[0], t[1]) for t in clip.get("segments") or [(clip["start"], clip["end"])]]
+    body = [_cut(s, e, words, clip) for s, e in body]
+    hook_len = segs[0][1] - segs[0][0] if segs else 0.0
+    body = _merge_close(body, max_total - hook_len)
     for start, end in body:
-        start, end = _cut(start, end, words, clip)
         inside = [w for w in words if w["end"] > start and w["start"] < end]
         if not max_gap or len(inside) < 2:
             segs.append((start, end))
             continue
-        # jump cuts: cortamos los huecos sin habla más largos que max_gap, dejando respiro
+        # jump cuts solo en silencios largos ENTRE frases (nunca en una pausa a mitad de frase)
         cur = start
-        for prev, nxt in zip(inside, inside[1:]):
-            if nxt["start"] - prev["end"] > max_gap:
+        for k, (prev, nxt) in enumerate(zip(inside, inside[1:])):
+            if nxt["start"] - prev["end"] > max_gap and _ends_phrase(inside, k):
                 segs.append((cur, prev["end"] + PAD))
                 cur = nxt["start"] - PAD
         segs.append((cur, end))
@@ -251,7 +281,8 @@ def render_clip(video: Path | str, info: dict, clip: dict, words: list, out_dir:
         detected, center = detect_layout(Path(info.get("preview") or video), start, end, cfg)
         mode = mode or detected
 
-    segs = clip_segments(clip, words, clip.get("cut_silences", cfg["render"].get("cut_silences", 0)))
+    segs = clip_segments(clip, words, clip.get("cut_silences", cfg["render"].get("cut_silences", 0)),
+                         cfg["general"].get("max_clip_seconds", 30) - 0.5)
     # cada tramo dura un número entero de cuadros (30 fps): si no, el redondeo de cada corte
     # se acumula y los subtítulos se van desfasando a lo largo del clip
     segs = [(a, a + max(1, round((b - a) * 30)) / 30) for a, b in segs]

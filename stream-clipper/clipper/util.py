@@ -41,7 +41,7 @@ DEFAULTS = {
     "brand": {"enabled": True, "text": "kick.com/dramacer0", "color": "#53FC18",
               "icon": "assets/kick-icon.png", "font_file": "Anton.ttf", "height": 64,
               "stroke": 3, "band_height": 96, "band_color": "0x0b0b0b"},
-    "render": {"encoder": "libx264", "crf": 20, "max_height": 1080, "cut_silences": 1.2},
+    "render": {"encoder": "libx264", "crf": 20, "max_height": 1080, "cut_silences": 2.5},
 }
 
 

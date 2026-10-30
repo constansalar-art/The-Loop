@@ -63,7 +63,9 @@ reacción más fuerte del momento (normalmente el remate). Se muestra primero, c
 encima, y después arranca el clip desde start_seconds. El gancho tiene que generar \
 curiosidad ("¿cómo llegó a esto?") sin spoilear todo el chiste.
 - El cuerpo (start_seconds a end_seconds) empieza justo donde arranca la situación, sin \
-saludos ni relleno, y termina apenas después del remate o la reacción.
+saludos ni relleno, y termina apenas después del remate o la reacción. Es un tramo continuo: \
+el editor solo corta pausas largas entre frases, así que no lo partas en pedacitos y dejá \
+que cada frase termine.
 - Las malas palabras NO son motivo para descartar un momento: se censuran solas con un \
 pitido. Lo que sí hay que descartar es otra cosa:
 - NO elijas momentos con insultos racistas, xenófobos u homofóbicos, comentarios sobre \

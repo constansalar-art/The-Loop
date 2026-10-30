@@ -58,7 +58,7 @@ title_outline_width = 12
 encoder = "libx264"       # usá "h264_nvenc" si tenés NVIDIA (mucho más rápido)
 crf = 20
 max_height = 1080         # calidad máxima al descargar la VOD
-cut_silences = 1.2        # corta pausas sin habla de más de N segundos (0 = no cortar)
+cut_silences = 2.5        # corta pausas sin habla de más de N segundos entre frases (0 = no cortar)
 
 [brand]
 # Cartel del canal en todos los clips (logo + dirección). No tapa el video: en los clips de juego
