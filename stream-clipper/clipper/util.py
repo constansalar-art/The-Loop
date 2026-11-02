@@ -43,7 +43,8 @@ DEFAULTS = {
               "icon": "assets/kick-icon.png", "font_file": "Anton.ttf", "height": 64,
               "stroke": 3, "band_height": 96, "band_color": "0x0b0b0b",
               "pill": True},
-    "render": {"encoder": "libx264", "crf": 20, "max_height": 1080, "cut_silences": 0},
+    "render": {"encoder": "libx264", "crf": 20, "max_height": 1080, "cut_silences": 0,
+               "video_aware_cuts": True},
     "style": {"mode": "classic"},
 }
 

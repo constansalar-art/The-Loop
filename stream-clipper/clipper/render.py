@@ -233,6 +233,64 @@ def tidy_segment(start: float, end: float, words: list) -> tuple[float, float]:
     return round(new_start, 2), round(new_end, 2)
 
 
+def _motion(video: Path, start: float, end: float, fps: int = 10) -> list[tuple[float, float]]:
+    """Cuánto cambia la imagen entre cuadros (0-255) en [start, end], muestreado a fps."""
+    import cv2
+    import numpy as np
+
+    cap = cv2.VideoCapture(str(video))
+    cap.set(cv2.CAP_PROP_POS_MSEC, max(0.0, start) * 1000)
+    out, prev, t = [], None, max(0.0, start)
+    src_fps = cap.get(cv2.CAP_PROP_FPS) or 30
+    step = max(1, round(src_fps / fps))
+    n = 0
+    while t <= end:
+        ok, frame = cap.read()
+        if not ok:
+            break
+        n += 1
+        if (n - 1) % step:
+            continue
+        g = cv2.cvtColor(cv2.resize(frame, (160, 90)), cv2.COLOR_BGR2GRAY).astype(np.float32)
+        if prev is not None:
+            out.append((t, float(np.mean(np.abs(g - prev)))))
+        prev, t = g, start + n / src_fps
+    cap.release()
+    return out
+
+
+SCENE_JUMP = 70.0  # diferencia media entre cuadros que cuenta como cambio de escena/plano
+
+
+def refine_cut(video: Path, a: float, b: float, is_hook: bool = False,
+               scene_jumps: bool = True) -> tuple[float, float]:
+    """Ajusta un tramo mirando el video, no solo el audio:
+    - si hay un cambio de escena (cambio de plano, de layout, transición) en el primer o último
+      segundo del tramo, el corte se mueve a ese cambio para no mostrar un cachito de otra escena;
+    - si no, el corte se corre (hasta 0.4 s hacia afuera, para no comerse palabras) al cuadro
+      más quieto, para no cortar a mitad de un gesto o de un movimiento brusco."""
+    try:
+        head = _motion(video, a - 0.4, a + 1.2)
+        tail = _motion(video, b - 1.2, b + 0.4)
+    except Exception:
+        return a, b
+    jumps = [t for t, m in head if m > SCENE_JUMP and t > a + 0.05] if scene_jumps else []
+    if jumps and not is_hook:
+        a = jumps[0]
+    else:
+        calm = [(m, t) for t, m in head if t <= a]
+        if calm:
+            a = min(calm)[1]
+    jumps = [t for t, m in tail if m > SCENE_JUMP and t < b - 0.05] if scene_jumps else []
+    if jumps:
+        b = jumps[-1] - 0.04
+    else:
+        calm = [(m, t) for t, m in tail if t >= b]
+        if calm:
+            b = min(calm)[1]
+    return a, max(b, a + 0.5)
+
+
 def _cut(start: float, end: float, words: list, clip: dict) -> tuple[float, float]:
     """Con "exact_cuts" se respetan los cortes elegidos a mano (ya caen entre palabras): solo se
     agrega un respiro corto. Sirve cuando Whisper arma frases muy largas y ajustar a fin de
@@ -335,6 +393,15 @@ def render_clip(video: Path | str, info: dict, clip: dict, words: list, out_dir:
                          max_s - 0.5)
     # cada tramo dura un número entero de cuadros (30 fps): si no, el redondeo de cada corte
     # se acumula y los subtítulos se van desfasando a lo largo del clip
+    # los cortes también miran la imagen: se mueven a un momento quieto y nunca quedan
+    # pegados a un cambio de escena (si hay copia liviana local de la VOD para analizar)
+    preview = info.get("preview")
+    if cfg["render"].get("video_aware_cuts", True) and preview and Path(preview).exists():
+        # en la timba la pantalla del juego cambia todo el tiempo (giros, premios): ahí no se
+        # buscan cambios de escena, solo el cuadro más quieto
+        jumps = clip.get("layout") != "split"
+        segs = [refine_cut(Path(preview), a, b, i == 0 and len(segs) > 1, jumps)
+                for i, (a, b) in enumerate(segs)]
     segs = [(a, a + max(1, round((b - a) * 30)) / 30) for a, b in segs]
     total = sum(e - s for s, e in segs)
     # ajustes de layout por tramo: "segments": [[a, b, {"fullcam_rect": [...]}], ...] y
