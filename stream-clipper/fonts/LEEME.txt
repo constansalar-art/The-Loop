@@ -1,0 +1,5 @@
+Tipografías incluidas para los títulos (licencia SIL Open Font License 1.1, se pueden redistribuir):
+- Luckiest Guy (Astigmatic) - https://fonts.google.com/specimen/Luckiest+Guy
+- Anton (Vernon Adams) - https://fonts.google.com/specimen/Anton
+Se usan con el nombre de familia en config.toml -> [subtitles] title_font.
+Podés agregar cualquier otra .ttf a esta carpeta y usar su nombre.
