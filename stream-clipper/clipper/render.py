@@ -382,7 +382,8 @@ def render_clip(video: Path | str, info: dict, clip: dict, words: list, out_dir:
     center = clip.get("center_x", 0.5)  # centro horizontal del recorte, fijado a mano si hace falta
     if mode != "split" and not (mode and "center_x" in clip):
         # si la fuente es un link, la detección usa la copia liviana local (meta "preview")
-        detected, center = detect_layout(Path(info.get("preview") or video), start, end, cfg)
+        po = info.get("preview_offset", 0.0) if info.get("preview") else 0.0
+        detected, center = detect_layout(Path(info.get("preview") or video), start + po, end + po, cfg)
         mode = mode or detected
 
     # los clips de timba (layout split) pueden durar más: se muestra todo el recorrido del slot
@@ -400,7 +401,9 @@ def render_clip(video: Path | str, info: dict, clip: dict, words: list, out_dir:
         # en la timba la pantalla del juego cambia todo el tiempo (giros, premios): ahí no se
         # buscan cambios de escena, solo el cuadro más quieto
         jumps = clip.get("layout") != "split"
-        segs = [refine_cut(Path(preview), a, b, i == 0 and len(segs) > 1, jumps)
+        # preview_offset: si la copia liviana está corrida respecto del audio (segundos a sumar)
+        po = info.get("preview_offset", 0.0)
+        segs = [tuple(x - po for x in refine_cut(Path(preview), a + po, b + po, i == 0 and len(segs) > 1, jumps))
                 for i, (a, b) in enumerate(segs)]
     segs = [(a, a + max(1, round((b - a) * 30)) / 30) for a, b in segs]
     total = sum(e - s for s, e in segs)
@@ -434,7 +437,8 @@ def render_clip(video: Path | str, info: dict, clip: dict, words: list, out_dir:
         bh = cfg["brand"]["height"] if cfg["brand"]["enabled"] else 0
         if mode == "fullcam" and tiktok:
             # cada tramo se centra en las caras de ese tramo (como cambiar de plano)
-            box = None if clip.get("center_x") else face_box(Path(info.get("preview") or video), s, e)
+            po = info.get("preview_offset", 0.0) if info.get("preview") else 0.0
+            box = None if clip.get("center_x") else face_box(Path(info.get("preview") or video), s + po, e + po)
             g = _filter_fill(vw, vh, box, center, f"{i}:v", f"v{i}", seg_cfgs[i])
             badge_y, sub_y, title_y = 120, int(H * 0.63), 250
         elif mode == "fullcam":
