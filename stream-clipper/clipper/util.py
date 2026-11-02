@@ -13,7 +13,7 @@ DEFAULTS = {
         "num_clips": 10,
         "min_clip_seconds": 15,
         "max_clip_seconds": 30,
-        "max_casino_clip_seconds": 60,
+        "max_casino_clip_seconds": 90,
         "use_chat": False,
     },
     "whisper": {"model": "auto", "device": "auto"},

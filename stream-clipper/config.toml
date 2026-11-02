@@ -11,7 +11,7 @@ language = "es"
 num_clips = 10            # cuántos clips proponer (después elegís vos cuáles subir)
 min_clip_seconds = 15
 max_clip_seconds = 30
-max_casino_clip_seconds = 60   # los de timba muestran todo el recorrido del slot
+max_casino_clip_seconds = 90   # timba: bono entero si entra; si no, entrada + retriggers + pagos grandes + final
 use_chat = false          # chat de Kick (experimental: scrapea esquivando su anti-bot, no recomendado)
 
 [whisper]
