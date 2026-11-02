@@ -138,9 +138,25 @@ def fetch_section(page_url: str, start: float, end: float, cache_dir: Path, max_
     empezando más tarde que el video: si al tramo le falta video o audio, reintenta con más
     margen."""
     cache_dir.mkdir(parents=True, exist_ok=True)
-    for pad in (SECTION_PAD, SECTION_PAD + 4, SECTION_PAD + 10):
-        a, b = max(0.0, start - pad), end + pad
-        out = cache_dir / f"{a:.2f}_{b:.2f}.mp4"
+    # si ya hay bajado un tramo más grande que cubre este (p. ej. bajado de antemano mientras la
+    # VOD estaba pública), se usa ese
+    covering = []
+    for f in cache_dir.glob("*_*.mp4"):
+        try:
+            fa, fb = (float(x) for x in f.stem.split("_"))
+        except ValueError:
+            continue
+        if fa <= start - 1.0 and fb >= end + 1.0:
+            covering.append((fb - fa, fa, f))
+    pads = [None] + [SECTION_PAD, SECTION_PAD + 4, SECTION_PAD + 10] if covering else \
+        [SECTION_PAD, SECTION_PAD + 4, SECTION_PAD + 10]
+    for pad in pads:
+        if pad is None:
+            _, a, out = min(covering)
+            b = end
+        else:
+            a, b = max(0.0, start - pad), end + pad
+            out = cache_dir / f"{a:.2f}_{b:.2f}.mp4"
         if not out.exists():
             tmp = cache_dir / f"{a:.2f}_{b:.2f}.part"
             run([sys.executable, "-m", "yt_dlp", "-q", "--no-warnings",
