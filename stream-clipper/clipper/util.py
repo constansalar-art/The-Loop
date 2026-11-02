@@ -13,6 +13,7 @@ DEFAULTS = {
         "num_clips": 10,
         "min_clip_seconds": 15,
         "max_clip_seconds": 30,
+        "max_casino_clip_seconds": 60,
         "use_chat": False,
     },
     "whisper": {"model": "auto", "device": "auto"},
@@ -40,8 +41,9 @@ DEFAULTS = {
     "censor": {"enabled": True, "audio": "beep"},
     "brand": {"enabled": True, "text": "kick.com/dramacer0", "color": "#53FC18",
               "icon": "assets/kick-icon.png", "font_file": "Anton.ttf", "height": 64,
-              "stroke": 3, "band_height": 96, "band_color": "0x0b0b0b"},
-    "render": {"encoder": "libx264", "crf": 20, "max_height": 1080, "cut_silences": 2.5},
+              "stroke": 3, "band_height": 96, "band_color": "0x0b0b0b",
+              "pill": True},
+    "render": {"encoder": "libx264", "crf": 20, "max_height": 1080, "cut_silences": 0},
     "style": {"mode": "classic"},
 }
 

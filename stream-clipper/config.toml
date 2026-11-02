@@ -11,6 +11,7 @@ language = "es"
 num_clips = 10            # cuántos clips proponer (después elegís vos cuáles subir)
 min_clip_seconds = 15
 max_clip_seconds = 30
+max_casino_clip_seconds = 60   # los de timba muestran todo el recorrido del slot
 use_chat = false          # chat de Kick (experimental: scrapea esquivando su anti-bot, no recomendado)
 
 [whisper]
@@ -58,7 +59,7 @@ title_outline_width = 12
 encoder = "libx264"       # usá "h264_nvenc" si tenés NVIDIA (mucho más rápido)
 crf = 20
 max_height = 1080         # calidad máxima al descargar la VOD
-cut_silences = 2.5        # corta pausas sin habla de más de N segundos entre frases (0 = no cortar)
+cut_silences = 0          # corta pausas sin habla de más de N segundos entre frases (0 = no cortar)
 
 [brand]
 # Cartel del canal en todos los clips (logo + dirección). No tapa el video: en los clips de juego
@@ -71,6 +72,7 @@ font_file = "Anton.ttf"    # tipografía del cartel (carpeta fonts/)
 height = 64                # alto del cartel en px (el video mide 1080x1920)
 band_height = 96           # alto de la franja entre cámara y juego
 band_color = "0x0b0b0b"
+pill = true                # cartel tipo pastilla (fondo oscuro redondeado)
 
 [censor]
 enabled = true

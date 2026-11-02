@@ -56,7 +56,10 @@ verdades: un pico sin nada interesante en la transcripción no sirve, y un buen 
 tranquilo sí puede servir.
 - La transcripción es automática y tiene errores; interpretá la intención.
 - Cada clip dura entre {min_s} y {max_s} segundos EN TOTAL, contando el gancho. Es un \
-límite duro: si el momento es más largo, quedate con la parte más fuerte.
+límite duro: si el momento es más largo, quedate con la parte más fuerte. Excepción: en los \
+clips de casino mostrá TODO el recorrido de la jugada (desde que arranca el bono o la tirada \
+hasta el resultado y la reacción), aunque dure hasta 60 segundos; nunca solo el final.
+- CORTES: los menos posibles. El cuerpo es UN tramo continuo; no lo partas.
 - GANCHO (cold open): los primeros 2 segundos deciden si la gente se queda. Elegí con \
 hook_start_seconds/hook_end_seconds un fragmento de 1.5 a 3 segundos con la frase o \
 reacción más fuerte del momento (normalmente el remate). Se muestra primero, con el título \

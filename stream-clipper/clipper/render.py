@@ -327,8 +327,12 @@ def render_clip(video: Path | str, info: dict, clip: dict, words: list, out_dir:
         detected, center = detect_layout(Path(info.get("preview") or video), start, end, cfg)
         mode = mode or detected
 
+    # los clips de timba (layout split) pueden durar más: se muestra todo el recorrido del slot
+    g = cfg["general"]
+    max_s = clip.get("max_seconds") or (g.get("max_casino_clip_seconds", 60) if clip.get("layout") == "split"
+                                        else g.get("max_clip_seconds", 30))
     segs = clip_segments(clip, words, clip.get("cut_silences", cfg["render"].get("cut_silences", 0)),
-                         cfg["general"].get("max_clip_seconds", 30) - 0.5)
+                         max_s - 0.5)
     # cada tramo dura un número entero de cuadros (30 fps): si no, el redondeo de cada corte
     # se acumula y los subtítulos se van desfasando a lo largo del clip
     segs = [(a, a + max(1, round((b - a) * 30)) / 30) for a, b in segs]
