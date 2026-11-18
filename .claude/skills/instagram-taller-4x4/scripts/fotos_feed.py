@@ -57,7 +57,7 @@ def historia(im, titulo, sub, pie):
     d = ImageDraw.Draw(bg); f1 = ImageFont.truetype(FB, 96); f2 = ImageFont.truetype(FB, 46)
     def c(t, f, yy, fill):
         if t: d.text(((W - d.textlength(t, font=f)) / 2, yy), t, font=f, fill=fill, stroke_width=3, stroke_fill='black')
-    c(titulo, f1, max(60, y - 260), 'white'); c(sub, f2, max(180, y - 130), (255, 60, 70)); c(pie, f2, min(H - 140, y + fg.height + 80), 'white')
+    c(titulo, f1, max(60, y - 260), 'white'); c(sub, f2, max(180, y - 130), (255, 255, 255)); c(pie, f2, min(H - 140, y + fg.height + 80), 'white')
     return bg
 
 if __name__ == '__main__':

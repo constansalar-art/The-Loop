@@ -42,10 +42,10 @@ def titular(im, t, txt, sub, y=230):
     d = ImageDraw.Draw(im); f = ImageFont.truetype(FB, 110); f2 = ImageFont.truetype(FB, 52)
     off = int((1 - ease(min(1, t * 3))) * 60)
     w = d.textlength(txt, font=f); x = (W - w) / 2
-    d.rectangle((x - 30, y - 20 + off, x + w + 30, y + 125 + off), fill=(225, 30, 45))
+    d.rectangle((x - 30, y - 20 + off, x + w + 30, y + 125 + off), fill=(0x32, 0x32, 0x48))
     d.text((x, y + off), txt, font=f, fill='white')
     if sub:
-        d.text(((W - d.textlength(sub, font=f2)) / 2, y + 160 + off), sub, font=f2, fill='white', stroke_width=4, stroke_fill='black')
+        d.text(((W - d.textlength(sub, font=f2)) / 2, y + 160 + off), sub, font=f2, fill='white', stroke_width=4, stroke_fill=(0x11, 0x11, 0x11))
 
 frames = []
 zx, zy = cfg.get('zoom_desde', [SW / 2, SH / 2]); p1 = cfg.get('plano_1_x', SW / 2); p2 = cfg.get('plano_2_x', p1)
@@ -75,16 +75,16 @@ for i in range(n + (60 if com else 30)):
     if circ:
         t = min(1, i / (n - 12)); cx, cy, rx, ry = (circ[0] - x0) * sc, (circ[1] - y0) * sc, circ[2], circ[3]
         pts = [(cx + rx * math.cos(a) + 6 * math.sin(a * 7), cy + ry * math.sin(a)) for a in np.linspace(-2.2, -2.2 + 2 * math.pi * 1.08 * t, 120)]
-        d.line(pts, fill=(255, 214, 0), width=16, joint='curve')
+        d.line(pts, fill=(255, 255, 255), width=16, joint='curve')
         if t >= 1 and cfg.get('etiqueta'):
             f = ImageFont.truetype(FB, 64); e = cfg['etiqueta']
-            d.text(((W - d.textlength(e, font=f)) / 2, min(H - 120, cy + ry + 40)), e, font=f, fill=(255, 214, 0), stroke_width=6, stroke_fill='black')
+            d.text(((W - d.textlength(e, font=f)) / 2, min(H - 120, cy + ry + 40)), e, font=f, fill=(255, 255, 255), stroke_width=6, stroke_fill=(0x11, 0x11, 0x11))
     if com and i >= n:
         s = ease(min(1, (i - n) / 8)); bh0 = 120 + 65 * len(com); bw, bh = int(860 * s), int(bh0 * s)
         if bw > 20:
             b = Image.new('RGBA', (860, bh0), (0, 0, 0, 0)); bd = ImageDraw.Draw(b)
             bd.rounded_rectangle((0, 0, 859, bh0 - 1), 36, fill=(255, 255, 255, 245))
-            bd.ellipse((30, 30, 110, 110), fill=(225, 30, 45))
+            bd.ellipse((30, 30, 110, 110), fill=(0x32, 0x32, 0x48))
             bd.text((130, 32), cfg.get('comentario_usuario', 'Responde a @cliente'), font=ImageFont.truetype(FR, 36), fill=(110, 110, 110))
             for j, l in enumerate(com): bd.text((130, 85 + 65 * j), l, font=ImageFont.truetype(FB, 50), fill='black')
             b = b.resize((bw, bh)); im.paste(b, ((W - bw) // 2, 230 + (bh0 - bh) // 2), b)
