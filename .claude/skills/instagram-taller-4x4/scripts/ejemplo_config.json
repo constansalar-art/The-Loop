@@ -1,0 +1,14 @@
+{
+  "foto": "foto.jpg",
+  "rotar": 90,
+  "titulo": "TALLER LLENO",
+  "subtitulo": "4 proyectos en marcha",
+  "zoom_desde": [260, 650],
+  "plano_1_x": 380,
+  "plano_2_x": 1290,
+  "acercar_a": [1350, 570],
+  "circulo": [1320, 640, 400, 300],
+  "etiqueta": "SNORKEL + PARAGOLPES",
+  "comentario_usuario": "Responde a @cliente",
+  "comentario": ["¿Le hacen snorkel", "a la Hilux?"]
+}
