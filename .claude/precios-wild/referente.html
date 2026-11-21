@@ -87,7 +87,7 @@ footer{color:var(--muted);font-size:12px;padding-block:24px}
   </section>
 
   <section id="v-proveedores" hidden>
-    <p class="legend">Al día: hasta 30 días · Revisar: 31 a 90 días · Vieja: más de 90 días. Solo los proveedores "Cargados" aparecen en el buscador de productos.</p>
+    <p class="legend">La fecha es la que figura impresa dentro de cada lista (en las webs, el día del relevamiento). Al día: hasta 30 días · Revisar: 31 a 90 días · Vieja: más de 90 días · Sin fecha: la lista no trae fecha. En las listas por cargar se muestra la fecha de modificación del archivo hasta leerlas. Solo los proveedores "Cargados" aparecen en el buscador.</p>
     <h2 class="gh" id="h-ok">Cargados en la referencia</h2>
     <div class="prov" id="provs-ok"></div>
     <h2 class="gh" id="h-pend">Listas ubicadas, por cargar</h2>
@@ -104,7 +104,7 @@ const $=id=>document.getElementById(id);
 const money=(n,m)=>n==null?'':(m==='USD'?'US$ '+n.toLocaleString('es-AR',{maximumFractionDigits:2}):'$'+Math.round(n).toLocaleString('es-AR'));
 const days=d=>d?Math.floor((Date.now()-new Date(d+'T12:00:00'))/864e5):null;
 const fdate=d=>d?new Date(d+'T12:00:00').toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}):'sin fecha';
-function age(d){const n=days(d);if(n==null)return['info','Sin dato'];if(n<=30)return['ok','Al día'];if(n<=90)return['warn','Revisar'];return['bad','Vieja']}
+function age(d){const n=days(d);if(n==null)return['warn','Sin fecha'];if(n<=30)return['ok','Al día'];if(n<=90)return['warn','Revisar'];return['bad','Vieja']}
 const norm=s=>(s||'').toString().normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
 const esc=s=>(s??'').toString().replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 let provs=[],items=[];
@@ -149,8 +149,8 @@ function renderRows(){
 function card(p,mode){
   const [c,t]=age(p.actualizado),n=(p.items||[]).length;
   let chips;
-  if(mode==='ok') chips=(p.tipo==='web'?'<span class="chip ok">Web</span>':'<span class="chip ok">Lista cargada</span>')+'<span class="chip '+c+'">'+t+'</span><span class="sub">'+fdate(p.actualizado)+'</span>';
-  else if(mode==='pend') chips='<span class="chip info">Por cargar</span><span class="chip '+c+'">Lista '+(c==='bad'?'vieja':c==='warn'?'a revisar':'reciente')+'</span><span class="sub">'+fdate(p.actualizado)+'</span>';
+  if(mode==='ok') chips=(p.tipo==='web'?'<span class="chip ok">Web</span>':'<span class="chip ok">Lista cargada</span>')+(p.actualizado?'<span class="chip '+c+'">'+t+'</span><span class="sub">'+(p.tipo==='web'?'Relevado el ':'Lista del ')+fdate(p.actualizado)+'</span>':'<span class="chip warn">Sin fecha en la lista</span>'+(p.fecha_archivo?'<span class="sub">Archivo: '+fdate(p.fecha_archivo)+' ('+esc(p.fecha_archivo_origen||'archivo')+')</span>':''));
+  else if(mode==='pend') chips='<span class="chip info">Por cargar</span><span class="chip '+c+'">Lista '+(c==='bad'?'vieja':c==='warn'?'a revisar':'reciente')+'</span><span class="sub">Archivo modificado el '+fdate(p.actualizado)+'</span>';
   else chips='<span class="chip info">Sin lista</span>';
   const link=p.fuente?'<a class="go" href="'+esc(p.fuente)+'" target="_blank" rel="noopener">'+(p.tipo==='lista'&&mode==='pend'?'Abrir lista ↗':'Abrir web ↗')+'</a>':'';
   const nota=mode==='pend'?(p.nota||'').replace('Lista en Drive, todavía sin cargar producto por producto','').replace(/^\s*·\s*/,''):(p.nota||'');

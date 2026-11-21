@@ -20,7 +20,9 @@ for it in L['items']:
 import re
 nota=' · '.join(x for x in [L.get('precio_es'),('Moneda: '+L['moneda']) if L.get('moneda') and L['moneda']!='ARS' else '',('IVA '+L['iva']) if L.get('iva') and L['iva']!='desconocido' else ''] if x)
 nota=re.sub(r'\bp\s*=',' Precio =',nota); nota=re.sub(r'\bt\s*=',' Otro precio =',nota); nota=re.sub(r'\bi\s*=',' Sin impuestos =',nota).strip()
-doc=dict(base); doc.update({'tipo':'lista','items':items,'nota':nota or 'Lista cargada','actualizado':L.get('vigencia') or base.get('actualizado'),'moneda':L.get('moneda','ARS')})
-if L.get('vigencia') is None: doc['nota']+=' · Fecha = modificación del archivo (la lista no trae fecha)'
+doc=dict(base); doc.update({'tipo':'lista','items':items,'nota':nota or 'Lista cargada','actualizado':L.get('vigencia'),'moneda':L.get('moneda','ARS')})
+if not L.get('vigencia'):
+    doc['fecha_archivo']=base.get('actualizado'); doc['fecha_archivo_origen']='modificación del archivo'
+    doc['nota']+=' · La lista no trae fecha impresa'
 json.dump(doc,open(S+f'listas/out/{slug}.json','w'),ensure_ascii=False,separators=(',',':'))
 print(slug,len(items),'items',os.path.getsize(S+f'listas/out/{slug}.json')//1024,'KB',doc['actualizado'],'|',doc['nota'])
