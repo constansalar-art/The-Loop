@@ -52,6 +52,7 @@ a{color:inherit} a.go{font-weight:600;font-size:12px;white-space:nowrap}
 .pcard .row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .pcard .note{color:var(--muted);font-size:12px}
 .legend{color:var(--muted);font-size:12px;margin:0 0 12px}
+.gh{font-family:var(--display);font-size:22px;font-weight:600;text-transform:uppercase;letter-spacing:.01em;margin:20px 0 10px}
 footer{color:var(--muted);font-size:12px;padding-block:24px}
 </style>
 
@@ -60,8 +61,8 @@ footer{color:var(--muted);font-size:12px;padding-block:24px}
   <div><h1>Referente de precios</h1><p id="sub">Cargando datos…</p></div>
   <div class="stats">
     <div class="stat"><b id="s-prod">–</b><span>Productos con precio</span></div>
-    <div class="stat"><b id="s-prov">–</b><span>Proveedores</span></div>
-    <div class="stat"><b id="s-old">–</b><span>Fuentes viejas</span></div>
+    <div class="stat"><b id="s-prov">–</b><span>Proveedores cargados</span></div>
+    <div class="stat"><b id="s-old">–</b><span>Listas por cargar</span></div>
   </div>
 </div></header>
 
@@ -86,8 +87,13 @@ footer{color:var(--muted);font-size:12px;padding-block:24px}
   </section>
 
   <section id="v-proveedores" hidden>
-    <p class="legend">Al día: hasta 30 días · Revisar: 31 a 90 días · Vieja: más de 90 días. Los proveedores con "Lista en Drive" tienen el archivo ubicado pero todavía no cargado producto por producto.</p>
-    <div class="prov" id="provs"></div>
+    <p class="legend">Al día: hasta 30 días · Revisar: 31 a 90 días · Vieja: más de 90 días. Solo los proveedores "Cargados" aparecen en el buscador de productos.</p>
+    <h2 class="gh" id="h-ok">Cargados en la referencia</h2>
+    <div class="prov" id="provs-ok"></div>
+    <h2 class="gh" id="h-pend">Listas ubicadas, por cargar</h2>
+    <div class="prov" id="provs-pend"></div>
+    <h2 class="gh" id="h-none">Sin lista de precios</h2>
+    <div class="prov" id="provs-none"></div>
   </section>
 
   <footer>Los precios de web son precios al público del proveedor, usados como referencia. Cada fila muestra la fecha de su fuente. Actualización: se pide a Claude.</footer>
@@ -116,8 +122,8 @@ function build(docs){
   const fechas=provs.map(p=>p.actualizado).filter(Boolean).sort();
   $('sub').textContent=fechas.length?'Última actualización: '+fdate(fechas[fechas.length-1]):'Sin datos cargados';
   $('s-prod').textContent=items.length.toLocaleString('es-AR');
-  $('s-prov').textContent=provs.length;
-  $('s-old').textContent=provs.filter(p=>{const n=days(p.actualizado);return n==null||n>90}).length;
+  $('s-prov').textContent=provs.filter(p=>(p.items||[]).length).length;
+  $('s-old').textContent=provs.filter(p=>!(p.items||[]).length&&p.tipo==='lista').length;
   renderRows();renderProvs();
 }
 
@@ -140,17 +146,30 @@ function renderRows(){
   }).join('');
 }
 
+function card(p,mode){
+  const [c,t]=age(p.actualizado),n=(p.items||[]).length;
+  let chips;
+  if(mode==='ok') chips=(p.tipo==='web'?'<span class="chip ok">Web</span>':'<span class="chip ok">Lista cargada</span>')+'<span class="chip '+c+'">'+t+'</span><span class="sub">'+fdate(p.actualizado)+'</span>';
+  else if(mode==='pend') chips='<span class="chip info">Por cargar</span><span class="chip '+c+'">Lista '+(c==='bad'?'vieja':c==='warn'?'a revisar':'reciente')+'</span><span class="sub">'+fdate(p.actualizado)+'</span>';
+  else chips='<span class="chip info">Sin lista</span>';
+  const link=p.fuente?'<a class="go" href="'+esc(p.fuente)+'" target="_blank" rel="noopener">'+(p.tipo==='lista'&&mode==='pend'?'Abrir lista ↗':'Abrir web ↗')+'</a>':'';
+  const nota=mode==='pend'?(p.nota||'').replace('Lista en Drive, todavía sin cargar producto por producto','').replace(/^\s*·\s*/,''):(p.nota||'');
+  return '<div class="pcard"><h3>'+esc(p.nombre)+'</h3><div class="row">'+chips+'</div>'+
+    (n?'<div class="sub">'+n.toLocaleString('es-AR')+' productos en la referencia</div>':'')+(p.archivo?'<div class="sub">'+esc(p.archivo)+'</div>':'')+
+    (nota?'<div class="note">'+esc(nota)+'</div>':'')+
+    '<div class="row">'+link+(p.web?' <a class="go" href="'+esc(p.web)+'" target="_blank" rel="noopener">Web ↗</a>':'')+'</div></div>';
+}
 function renderProvs(){
-  const order={bad:0,warn:1,info:2,ok:3};
-  const list=[...provs].sort((a,b)=>order[age(a.actualizado)[0]]-order[age(b.actualizado)[0]]||(a.nombre||'').localeCompare(b.nombre||''));
-  $('provs').innerHTML=list.map(p=>{
-    const [c,t]=age(p.actualizado),n=(p.items||[]).length;
-    const tipo=p.tipo==='web'?'<span class="chip ok">Web automática</span>':p.tipo==='lista'?'<span class="chip info">Lista en Drive</span>':'<span class="chip info">Sin datos</span>';
-    return '<div class="pcard"><h3>'+esc(p.nombre)+'</h3><div class="row">'+tipo+'<span class="chip '+c+'">'+t+'</span><span class="sub">'+fdate(p.actualizado)+'</span></div>'+
-      (n?'<div class="sub">'+n+' productos cargados</div>':'')+(p.archivo?'<div class="sub">'+esc(p.archivo)+'</div>':'')+
-      (p.nota?'<div class="note">'+esc(p.nota)+'</div>':'')+
-      '<div class="row">'+(p.fuente?'<a class="go" href="'+esc(p.fuente)+'" target="_blank" rel="noopener">'+(p.tipo==='lista'?'Abrir lista ↗':'Abrir web ↗')+'</a>':'')+(p.web?' <a class="go" href="'+esc(p.web)+'" target="_blank" rel="noopener">Web ↗</a>':'')+'</div></div>';
-  }).join('')||'<div class="empty">Todavía no hay proveedores cargados.</div>';
+  const by=(a,b)=>(a.actualizado||'').localeCompare(b.actualizado||'')*-1||(a.nombre||'').localeCompare(b.nombre||'');
+  const ok=provs.filter(p=>(p.items||[]).length).sort(by);
+  const pend=provs.filter(p=>!(p.items||[]).length&&p.tipo==='lista').sort(by);
+  const none=provs.filter(p=>!(p.items||[]).length&&p.tipo!=='lista').sort(by);
+  $('h-ok').textContent='Cargados en la referencia ('+ok.length+')';
+  $('h-pend').textContent='Listas ubicadas, por cargar ('+pend.length+')';
+  $('h-none').textContent='Sin lista de precios ('+none.length+')';
+  $('provs-ok').innerHTML=ok.map(p=>card(p,'ok')).join('')||'<div class="empty">Todavía no hay proveedores cargados.</div>';
+  $('provs-pend').innerHTML=pend.map(p=>card(p,'pend')).join('')||'<div class="empty">No hay listas pendientes.</div>';
+  $('provs-none').innerHTML=none.map(p=>card(p,'none')).join('')||'<div class="empty">Ninguno.</div>';
 }
 
 function tab(v){for(const k of['productos','proveedores']){$('tab-'+k).setAttribute('aria-selected',k===v);$('v-'+k).hidden=k!==v}}
