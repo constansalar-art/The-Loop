@@ -52,7 +52,17 @@ a{color:inherit} a.go{font-weight:600;font-size:12px;white-space:nowrap}
 .pcard .row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .pcard .note{color:var(--muted);font-size:12px}
 .legend{color:var(--muted);font-size:12px;margin:0 0 12px}
-.gh{font-family:var(--display);font-size:22px;font-weight:600;text-transform:uppercase;letter-spacing:.01em;margin:20px 0 10px}
+.gh{font-family:var(--display);font-size:22px;font-weight:600;text-transform:uppercase;letter-spacing:.01em}
+details.grp{background:var(--surface);border:1px solid var(--line);border-radius:8px;margin:10px 0}
+details.grp>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px;padding:12px 14px}
+details.grp>summary::-webkit-details-marker{display:none}
+details.grp>summary::before{content:"";width:8px;height:8px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(-45deg);transition:transform .15s;flex:none}
+details.grp[open]>summary::before{transform:rotate(45deg)}
+details.grp>.prov{padding:0 12px 12px}
+details.grp .pcard{background:var(--bg)}
+.pick{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 6px}
+.pick label{color:var(--muted);font-size:13px}
+@media (prefers-reduced-motion: reduce){details.grp>summary::before{transition:none}}
 footer{color:var(--muted);font-size:12px;padding-block:24px}
 </style>
 
@@ -88,12 +98,10 @@ footer{color:var(--muted);font-size:12px;padding-block:24px}
 
   <section id="v-proveedores" hidden>
     <p class="legend">La fecha es la que figura impresa dentro de cada lista (en las webs, el día del relevamiento). Al día: hasta 30 días · Revisar: 31 a 90 días · Vieja: más de 90 días · Sin fecha: la lista no trae fecha. En las listas por cargar se muestra la fecha de modificación del archivo hasta leerlas. Solo los proveedores "Cargados" aparecen en el buscador.</p>
-    <h2 class="gh" id="h-ok">Cargados en la referencia</h2>
-    <div class="prov" id="provs-ok"></div>
-    <h2 class="gh" id="h-pend">Listas ubicadas, por cargar</h2>
-    <div class="prov" id="provs-pend"></div>
-    <h2 class="gh" id="h-none">Sin lista de precios</h2>
-    <div class="prov" id="provs-none"></div>
+    <div class="pick"><label for="pstate">Ver proveedor</label><select id="pstate"><option value="">Todos los proveedores</option></select></div>
+    <details class="grp" id="g-ok" open><summary><span class="gh" id="h-ok">Cargados en la referencia</span></summary><div class="prov" id="provs-ok"></div></details>
+    <details class="grp" id="g-pend"><summary><span class="gh" id="h-pend">Listas ubicadas, por cargar</span></summary><div class="prov" id="provs-pend"></div></details>
+    <details class="grp" id="g-none"><summary><span class="gh" id="h-none">Sin lista de precios</span></summary><div class="prov" id="provs-none"></div></details>
   </section>
 
   <footer>Los precios de web son precios al público del proveedor, usados como referencia. Cada fila muestra la fecha de su fuente. Actualización: se pide a Claude.</footer>
@@ -160,10 +168,16 @@ function card(p,mode){
     '<div class="row">'+link+(p.web?' <a class="go" href="'+esc(p.web)+'" target="_blank" rel="noopener">Web ↗</a>':'')+'</div></div>';
 }
 function renderProvs(){
+  const ps=$('pstate'),cur=ps.value;
+  ps.innerHTML='<option value="">Todos los proveedores</option>'+[...provs].sort((a,b)=>(a.nombre||'').localeCompare(b.nombre||'')).map(p=>'<option value="'+esc(p.id)+'">'+esc(p.nombre)+'</option>').join('');
+  ps.value=cur;
+  const sel=ps.value;
   const by=(a,b)=>(a.actualizado||'').localeCompare(b.actualizado||'')*-1||(a.nombre||'').localeCompare(b.nombre||'');
-  const ok=provs.filter(p=>(p.items||[]).length).sort(by);
-  const pend=provs.filter(p=>!(p.items||[]).length&&p.tipo==='lista').sort(by);
-  const none=provs.filter(p=>!(p.items||[]).length&&p.tipo!=='lista').sort(by);
+  const pool=sel?provs.filter(p=>p.id===sel):provs;
+  const ok=pool.filter(p=>(p.items||[]).length).sort(by);
+  const pend=pool.filter(p=>!(p.items||[]).length&&p.tipo==='lista').sort(by);
+  const none=pool.filter(p=>!(p.items||[]).length&&p.tipo!=='lista').sort(by);
+  for(const [g,l] of [['g-ok',ok],['g-pend',pend],['g-none',none]]){$(g).hidden=sel&&!l.length;if(sel&&l.length)$(g).open=true}
   $('h-ok').textContent='Cargados en la referencia ('+ok.length+')';
   $('h-pend').textContent='Listas ubicadas, por cargar ('+pend.length+')';
   $('h-none').textContent='Sin lista de precios ('+none.length+')';
@@ -176,6 +190,7 @@ function tab(v){for(const k of['productos','proveedores']){$('tab-'+k).setAttrib
 $('tab-productos').onclick=()=>tab('productos');$('tab-proveedores').onclick=()=>tab('proveedores');
 let t;$('q').addEventListener('input',()=>{clearTimeout(t);t=setTimeout(renderRows,120)});
 for(const id of['fprov','orden','stock'])$(id).addEventListener('change',renderRows);
+$('pstate').addEventListener('change',renderProvs);
 
 (async()=>{
   const db=await claude.use("db");
