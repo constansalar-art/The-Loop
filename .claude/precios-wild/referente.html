@@ -1,0 +1,168 @@
+<title>Referente de Precios Wild4x4</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: banda azul de marca arriba, luego buscador y tabla densa; pestaña de estado de proveedores */
+:root{
+  --azul:#323248; --grafito:#111111; --bg:#f5f5f7; --surface:#ffffff; --fg:#1b1b26; --muted:#5f5f73; --line:#dedee6;
+  --ok:#1f7a4d; --ok-bg:#e3f3ea; --warn:#8a5a00; --warn-bg:#fbefd5; --bad:#a3262a; --bad-bg:#f8e1e2; --info-bg:#e8e8f0;
+  --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif; --body:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#15151d;--surface:#1e1e29;--fg:#ececf3;--muted:#a3a3b8;--line:#33334a;--ok:#6fd3a0;--ok-bg:#163527;--warn:#f0c46a;--warn-bg:#3a2e12;--bad:#f19a9d;--bad-bg:#3d1c1e;--info-bg:#2a2a3a;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#15151d;--surface:#1e1e29;--fg:#ececf3;--muted:#a3a3b8;--line:#33334a;--ok:#6fd3a0;--ok-bg:#163527;--warn:#f0c46a;--warn-bg:#3a2e12;--bad:#f19a9d;--bad-bg:#3d1c1e;--info-bg:#2a2a3a;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:14px;line-height:1.45}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.band{background:var(--azul);color:#fff;margin-top:calc(-1*env(safe-area-inset-top,0px));padding-top:calc(env(safe-area-inset-top,0px) + 20px);padding-bottom:20px}
+.band .wrap{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.band img{width:48px;height:auto}
+.band h1{font-family:var(--display);font-weight:700;font-size:34px;line-height:1;margin:0;letter-spacing:.01em;text-transform:uppercase}
+.band p{margin:4px 0 0;color:#c9c9d8;font-size:13px}
+.stats{display:flex;gap:8px 24px;flex-wrap:wrap;margin-left:auto}
+.stat b{display:block;font-family:var(--display);font-size:26px;font-weight:600;font-variant-numeric:tabular-nums}
+.stat span{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#c9c9d8}
+nav{display:flex;gap:4px;margin:18px 0 12px;border-bottom:1px solid var(--line)}
+nav button{font:600 14px var(--body);background:none;border:0;color:var(--muted);padding:10px 14px;border-bottom:3px solid transparent;cursor:pointer}
+nav button[aria-selected="true"]{color:var(--fg);border-color:var(--azul)}
+:root[data-theme="dark"] nav button[aria-selected="true"]{border-color:#9d9dc8}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) nav button[aria-selected="true"]{border-color:#9d9dc8}}
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.filters input[type=search]{flex:1 1 260px;min-width:0;font:15px var(--body);padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--fg)}
+select{font:14px var(--body);padding:9px 10px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--fg);max-width:100%}
+label.chk{display:flex;gap:6px;align-items:center;color:var(--muted);font-size:13px}
+:focus-visible{outline:2px solid #6c6cc4;outline-offset:2px}
+.count{color:var(--muted);font-size:12px;margin:4px 0 8px}
+.tablebox{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:8px}
+table{width:100%;border-collapse:collapse;min-width:760px}
+th{font:600 11px var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.pname{font-weight:500}
+.sub{color:var(--muted);font-size:12px}
+.chip{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.ok{background:var(--ok-bg);color:var(--ok)} .warn{background:var(--warn-bg);color:var(--warn)} .bad{background:var(--bad-bg);color:var(--bad)} .info{background:var(--info-bg);color:var(--muted)}
+.strike{text-decoration:line-through;color:var(--muted);font-size:12px}
+a{color:inherit} a.go{font-weight:600;font-size:12px;white-space:nowrap}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+.prov{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:10px}
+.pcard{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.pcard h3{font-family:var(--display);font-size:20px;font-weight:600;margin:0;text-transform:uppercase;letter-spacing:.01em}
+.pcard .row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.pcard .note{color:var(--muted);font-size:12px}
+.legend{color:var(--muted);font-size:12px;margin:0 0 12px}
+footer{color:var(--muted);font-size:12px;padding-block:24px}
+</style>
+
+<header class="band"><div class="wrap">
+  <img alt="Wild4x4" src="data:image/png;base64,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">
+  <div><h1>Referente de precios</h1><p id="sub">Cargando datos…</p></div>
+  <div class="stats">
+    <div class="stat"><b id="s-prod">–</b><span>Productos con precio</span></div>
+    <div class="stat"><b id="s-prov">–</b><span>Proveedores</span></div>
+    <div class="stat"><b id="s-old">–</b><span>Fuentes viejas</span></div>
+  </div>
+</div></header>
+
+<main class="wrap">
+  <nav role="tablist">
+    <button role="tab" id="tab-productos" aria-selected="true">Buscar productos</button>
+    <button role="tab" id="tab-proveedores" aria-selected="false">Estado de proveedores</button>
+  </nav>
+
+  <section id="v-productos">
+    <div class="filters">
+      <input type="search" id="q" placeholder="Producto, código o vehículo (ej: hilux snorkel)" autocomplete="off">
+      <select id="fprov" aria-label="Proveedor"><option value="">Todos los proveedores</option></select>
+      <select id="orden" aria-label="Orden"><option value="rel">Orden: nombre</option><option value="asc">Precio: menor a mayor</option><option value="desc">Precio: mayor a menor</option></select>
+      <label class="chk"><input type="checkbox" id="stock"> Solo con stock</label>
+    </div>
+    <div class="count" id="count"></div>
+    <div class="tablebox"><table>
+      <thead><tr><th>Producto</th><th>Proveedor</th><th class="num">Precio</th><th class="num">Transferencia</th><th class="num">Sin impuestos</th><th>Stock</th><th></th></tr></thead>
+      <tbody id="rows"><tr><td colspan="7" class="empty">Cargando precios…</td></tr></tbody>
+    </table></div>
+  </section>
+
+  <section id="v-proveedores" hidden>
+    <p class="legend">Al día: hasta 30 días · Revisar: 31 a 90 días · Vieja: más de 90 días. Los proveedores con "Lista en Drive" tienen el archivo ubicado pero todavía no cargado producto por producto.</p>
+    <div class="prov" id="provs"></div>
+  </section>
+
+  <footer>Los precios de web son precios al público del proveedor, usados como referencia. Cada fila muestra la fecha de su fuente. Actualización: se pide a Claude.</footer>
+</main>
+
+<script>
+const $=id=>document.getElementById(id);
+const money=n=>n==null?'':'$'+Math.round(n).toLocaleString('es-AR');
+const days=d=>d?Math.floor((Date.now()-new Date(d+'T12:00:00'))/864e5):null;
+const fdate=d=>d?new Date(d+'T12:00:00').toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}):'sin fecha';
+function age(d){const n=days(d);if(n==null)return['info','Sin dato'];if(n<=30)return['ok','Al día'];if(n<=90)return['warn','Revisar'];return['bad','Vieja']}
+const norm=s=>(s||'').toString().normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+const esc=s=>(s??'').toString().replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let provs=[],items=[];
+
+function build(docs){
+  provs=docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.nombre||'').localeCompare(b.nombre||''));
+  items=[];
+  for(const p of provs){
+    const base=(p.fuente||'').replace(/\/$/,'');
+    for(const it of (p.items||[])) items.push({...it,prov:p.nombre,pid:p.id,fecha:p.actualizado,link:it.u?(it.u.startsWith('http')?it.u:base+it.u):p.fuente,key:norm([it.n,it.v,it.s,p.nombre].join(' '))});
+  }
+  const sel=$('fprov'),cur=sel.value;
+  sel.innerHTML='<option value="">Todos los proveedores</option>'+provs.filter(p=>(p.items||[]).length).map(p=>'<option value="'+esc(p.id)+'">'+esc(p.nombre)+'</option>').join('');
+  sel.value=cur;
+  const fechas=provs.map(p=>p.actualizado).filter(Boolean).sort();
+  $('sub').textContent=fechas.length?'Última actualización: '+fdate(fechas[fechas.length-1]):'Sin datos cargados';
+  $('s-prod').textContent=items.length.toLocaleString('es-AR');
+  $('s-prov').textContent=provs.length;
+  $('s-old').textContent=provs.filter(p=>{const n=days(p.actualizado);return n==null||n>90}).length;
+  renderRows();renderProvs();
+}
+
+function renderRows(){
+  const words=norm($('q').value).split(/\s+/).filter(Boolean),fp=$('fprov').value,st=$('stock').checked,ord=$('orden').value;
+  let r=items.filter(it=>(!fp||it.pid===fp)&&(!st||(it.k??1)>0)&&words.every(w=>it.key.includes(w)));
+  if(ord==='asc')r.sort((a,b)=>a.p-b.p);else if(ord==='desc')r.sort((a,b)=>b.p-a.p);else r.sort((a,b)=>a.n.localeCompare(b.n));
+  const shown=r.slice(0,250);
+  $('count').textContent=items.length?('Mostrando '+shown.length+' de '+r.length+' productos'+(r.length>250?'. Afiná la búsqueda para ver el resto.':'')):'';
+  if(!items.length){$('rows').innerHTML='<tr><td colspan="7" class="empty">Todavía no hay productos cargados.</td></tr>';return}
+  if(!r.length){$('rows').innerHTML='<tr><td colspan="7" class="empty">Ningún producto coincide con la búsqueda.</td></tr>';return}
+  $('rows').innerHTML=shown.map(it=>{
+    const [c,t]=age(it.fecha);
+    const stock=it.k==null?'<span class="chip info">s/d</span>':it.k>0?'<span class="chip ok">'+it.k+' u.</span>':'<span class="chip bad">Sin stock</span>';
+    return '<tr><td><div class="pname">'+esc(it.n)+'</div><div class="sub">'+esc([it.v,it.s?'Cód. '+it.s:''].filter(Boolean).join(' · '))+'</div></td>'+
+      '<td>'+esc(it.prov)+'<div class="sub"><span class="chip '+c+'">'+t+'</span> '+fdate(it.fecha)+'</div></td>'+
+      '<td class="num"><b>'+money(it.p)+'</b>'+(it.a?'<div class="strike">'+money(it.a)+'</div>':'')+'</td>'+
+      '<td class="num">'+money(it.t)+'</td><td class="num">'+money(it.i)+'</td><td>'+stock+'</td>'+
+      '<td>'+(it.link?'<a class="go" href="'+esc(it.link)+'" target="_blank" rel="noopener">Ver ↗</a>':'')+'</td></tr>';
+  }).join('');
+}
+
+function renderProvs(){
+  const order={bad:0,warn:1,info:2,ok:3};
+  const list=[...provs].sort((a,b)=>order[age(a.actualizado)[0]]-order[age(b.actualizado)[0]]||(a.nombre||'').localeCompare(b.nombre||''));
+  $('provs').innerHTML=list.map(p=>{
+    const [c,t]=age(p.actualizado),n=(p.items||[]).length;
+    const tipo=p.tipo==='web'?'<span class="chip ok">Web automática</span>':p.tipo==='lista'?'<span class="chip info">Lista en Drive</span>':'<span class="chip info">Sin datos</span>';
+    return '<div class="pcard"><h3>'+esc(p.nombre)+'</h3><div class="row">'+tipo+'<span class="chip '+c+'">'+t+'</span><span class="sub">'+fdate(p.actualizado)+'</span></div>'+
+      (n?'<div class="sub">'+n+' productos cargados</div>':'')+(p.archivo?'<div class="sub">'+esc(p.archivo)+'</div>':'')+
+      (p.nota?'<div class="note">'+esc(p.nota)+'</div>':'')+
+      '<div class="row">'+(p.fuente?'<a class="go" href="'+esc(p.fuente)+'" target="_blank" rel="noopener">'+(p.tipo==='lista'?'Abrir lista ↗':'Abrir web ↗')+'</a>':'')+(p.web?' <a class="go" href="'+esc(p.web)+'" target="_blank" rel="noopener">Web ↗</a>':'')+'</div></div>';
+  }).join('')||'<div class="empty">Todavía no hay proveedores cargados.</div>';
+}
+
+function tab(v){for(const k of['productos','proveedores']){$('tab-'+k).setAttribute('aria-selected',k===v);$('v-'+k).hidden=k!==v}}
+$('tab-productos').onclick=()=>tab('productos');$('tab-proveedores').onclick=()=>tab('proveedores');
+let t;$('q').addEventListener('input',()=>{clearTimeout(t);t=setTimeout(renderRows,120)});
+for(const id of['fprov','orden','stock'])$(id).addEventListener('change',renderRows);
+
+(async()=>{
+  const db=await claude.use("db");
+  const fail=m=>{$('sub').textContent=m;$('rows').innerHTML='<tr><td colspan="7" class="empty">'+m+'</td></tr>'};
+  if(!db){fail('No se pudieron cargar los datos. Abrí la página con tu cuenta de Claude.');return}
+  const timer=setTimeout(()=>fail('Los datos tardan en llegar. Recargá la página en unos segundos.'),10000);
+  db.collection("proveedores").onSnapshot(s=>{clearTimeout(timer);build(s.docs)},e=>{clearTimeout(timer);fail('No se pudieron leer los precios ('+(e&&e.code||'error')+').')});
+})();
+</script>
