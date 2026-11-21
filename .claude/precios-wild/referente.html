@@ -87,6 +87,7 @@ footer{color:var(--muted);font-size:12px;padding-block:24px}
       <input type="search" id="q" placeholder="Producto, código o vehículo (ej: hilux snorkel)" autocomplete="off">
       <select id="fprov" aria-label="Proveedor"><option value="">Todos los proveedores</option></select>
       <select id="orden" aria-label="Orden"><option value="rel">Orden: nombre</option><option value="asc">Precio: menor a mayor</option><option value="desc">Precio: mayor a menor</option></select>
+      <select id="fmon" aria-label="Moneda"><option value="">Pesos y dólares</option><option value="ARS">Solo pesos</option><option value="USD">Solo dólares</option></select>
       <label class="chk"><input type="checkbox" id="stock"> Solo con stock</label>
     </div>
     <div class="count" id="count"></div>
@@ -137,8 +138,10 @@ function build(docs){
 
 function renderRows(){
   const words=norm($('q').value).split(/\s+/).filter(Boolean),fp=$('fprov').value,st=$('stock').checked,ord=$('orden').value;
-  let r=items.filter(it=>(!fp||it.pid===fp)&&(!st||(it.k??1)>0)&&words.every(w=>it.key.includes(w)));
-  if(ord==='asc')r.sort((a,b)=>a.p-b.p);else if(ord==='desc')r.sort((a,b)=>b.p-a.p);else r.sort((a,b)=>a.n.localeCompare(b.n));
+  const fm=$('fmon').value;
+  let r=items.filter(it=>(!fp||it.pid===fp)&&(!fm||it.mon===fm)&&(!st||(it.k??1)>0)&&words.every(w=>it.key.includes(w)));
+  const cur=(a,b)=>(a.mon==='USD')-(b.mon==='USD');
+  if(ord==='asc')r.sort((a,b)=>cur(a,b)||a.p-b.p);else if(ord==='desc')r.sort((a,b)=>cur(a,b)||b.p-a.p);else r.sort((a,b)=>a.n.localeCompare(b.n));
   const shown=r.slice(0,250);
   $('count').textContent=items.length?('Mostrando '+shown.length+' de '+r.length+' productos'+(r.length>250?'. Afiná la búsqueda para ver el resto.':'')):'';
   if(!items.length){$('rows').innerHTML='<tr><td colspan="7" class="empty">Todavía no hay productos cargados.</td></tr>';return}
@@ -189,7 +192,7 @@ function renderProvs(){
 function tab(v){for(const k of['productos','proveedores']){$('tab-'+k).setAttribute('aria-selected',k===v);$('v-'+k).hidden=k!==v}}
 $('tab-productos').onclick=()=>tab('productos');$('tab-proveedores').onclick=()=>tab('proveedores');
 let t;$('q').addEventListener('input',()=>{clearTimeout(t);t=setTimeout(renderRows,120)});
-for(const id of['fprov','orden','stock'])$(id).addEventListener('change',renderRows);
+for(const id of['fprov','fmon','orden','stock'])$(id).addEventListener('change',renderRows);
 $('pstate').addEventListener('change',renderProvs);
 
 (async()=>{

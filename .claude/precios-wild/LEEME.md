@@ -6,3 +6,4 @@
 - Big Toys: `bigtoys_scrape.py` (necesita `bt/sitemap.xml` de https://www.big-toys.com.ar/sitemap.xml y el host permitido en la red). Luego convertir a ítems y hacer `set` del documento `big-toys`.
 - Rhino4x4: lista PDF "Valores <MES> <AÑO>.pdf" -> `pdftotext -layout lista.pdf v.txt && python3 rhino_lista_pdf.py v.txt items.json` (sin códigos; IVA incluido).
 - Regla de fechas: `actualizado` = fecha impresa dentro de la lista (o día del relevamiento web). Si la lista no trae fecha: `actualizado` null y `fecha_archivo` + `fecha_archivo_origen` aparte.
+- Regla de moneda: los precios en USD se guardan en USD (`moneda` del proveedor o `mon` por ítem). Nunca convertir a pesos: el tipo de cambio es del día.
