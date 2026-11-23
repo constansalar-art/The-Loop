@@ -8,3 +8,4 @@
 - Regla de fechas: `actualizado` = fecha impresa dentro de la lista (o día del relevamiento web). Si la lista no trae fecha: `actualizado` null y `fecha_archivo` + `fecha_archivo_origen` aparte.
 - Regla de moneda: los precios en USD se guardan en USD (`moneda` del proveedor o `mon` por ítem). Nunca convertir a pesos: el tipo de cambio es del día.
 - MUG4x4: CSV exportado del portal con Claude in Chrome (columnas codigo, descripcion, precio_lista, mi_precio, moneda, stock). Precio = mi_precio (lista -20%), Otro precio = precio_lista, actualizado = día del relevamiento.
+- Bracco: CSV exportado del programa de escritorio (latin-1, separador ;, sin encabezado: codigo;descripcion;precio con coma decimal). Sin fecha ni IVA en la exportación.
