@@ -9,3 +9,4 @@
 - Regla de moneda: los precios en USD se guardan en USD (`moneda` del proveedor o `mon` por ítem). Nunca convertir a pesos: el tipo de cambio es del día.
 - MUG4x4: CSV exportado del portal con Claude in Chrome (columnas codigo, descripcion, precio_lista, mi_precio, moneda, stock). Precio = mi_precio (lista -20%), Otro precio = precio_lista, actualizado = día del relevamiento.
 - Bracco: CSV exportado del programa de escritorio (latin-1, separador ;, sin encabezado: codigo;descripcion;precio con coma decimal). Sin fecha ni IVA en la exportación.
+- Por vehículo: `veh.js` (catálogo VEH con generaciones, lectura de años y categorías). Está incluido en referente.html; probar con node antes de cambiar.

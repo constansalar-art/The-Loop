@@ -51,6 +51,10 @@ a{color:inherit} a.go{font-weight:600;font-size:12px;white-space:nowrap}
 .pcard h3{font-family:var(--display);font-size:20px;font-weight:600;margin:0;text-transform:uppercase;letter-spacing:.01em}
 .pcard .row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .pcard .note{color:var(--muted);font-size:12px}
+.vsum{font-size:15px;margin:2px 0 6px}
+.vsum b{font-family:var(--display);font-size:22px;font-weight:600;text-transform:uppercase;letter-spacing:.01em}
+.catcount{color:var(--muted);font-size:13px;font-weight:500;margin-left:auto;white-space:nowrap}
+details.grp .tablebox{border:0;border-radius:0;background:transparent}
 .legend{color:var(--muted);font-size:12px;margin:0 0 12px}
 .gh{font-family:var(--display);font-size:22px;font-weight:600;text-transform:uppercase;letter-spacing:.01em}
 details.grp{background:var(--surface);border:1px solid var(--line);border-radius:8px;margin:10px 0}
@@ -79,6 +83,7 @@ footer{color:var(--muted);font-size:12px;padding-block:24px}
 <main class="wrap">
   <nav role="tablist">
     <button role="tab" id="tab-productos" aria-selected="true">Buscar productos</button>
+    <button role="tab" id="tab-vehiculo" aria-selected="false">Por vehículo</button>
     <button role="tab" id="tab-proveedores" aria-selected="false">Estado de proveedores</button>
   </nav>
 
@@ -97,6 +102,20 @@ footer{color:var(--muted);font-size:12px;padding-block:24px}
     </table></div>
   </section>
 
+  <section id="v-vehiculo" hidden>
+    <div class="filters">
+      <select id="vmarca" aria-label="Marca"></select>
+      <select id="vmodelo" aria-label="Modelo"></select>
+      <select id="vanio" aria-label="Año"></select>
+      <label class="chk"><input type="checkbox" id="vstock"> Solo con stock</label>
+      <label class="chk"><input type="checkbox" id="vsinanio" checked> Incluir sin año</label>
+      <label class="chk"><input type="checkbox" id="vuniv"> Incluir universales</label>
+    </div>
+    <p class="vsum" id="vsum"></p>
+    <p class="legend">Compatibilidad leída de la descripción de cada proveedor. Confirmá versión (cabina, sensores, XL/LTD) antes de vender. "Sin año" = la descripción nombra el modelo pero no el año.</p>
+    <div id="vgroups"></div>
+  </section>
+
   <section id="v-proveedores" hidden>
     <p class="legend">La fecha es la que figura impresa dentro de cada lista (en las webs, el día del relevamiento). Al día: hasta 30 días · Revisar: 31 a 90 días · Vieja: más de 90 días · Sin fecha: la lista no trae fecha. En las listas por cargar se muestra la fecha de modificación del archivo hasta leerlas. Solo los proveedores "Cargados" aparecen en el buscador.</p>
     <div class="pick"><label for="pstate">Ver proveedor</label><select id="pstate"><option value="">Todos los proveedores</option></select></div>
@@ -109,6 +128,69 @@ footer{color:var(--muted);font-size:12px;padding-block:24px}
 </main>
 
 <script>
+// === Compatibilidad por vehículo (Wild4x4) ===
+const VEH=[
+ {marca:'Toyota',modelo:'Hilux',re:/\bhilux\b|\brevo\b/,gens:[[1998,2004,'1998-2004'],[2005,2015,'2005-2015'],[2016,2099,'2016 en adelante']]},
+ {marca:'Toyota',modelo:'SW4',re:/\bsw\s?-?4\b/,gens:[[1996,2004,'1996-2004'],[2005,2015,'2005-2015'],[2016,2099,'2016 en adelante']]},
+ {marca:'Ford',modelo:'Ranger',re:/\branger\b/,gens:[[1998,2011,'1998-2011'],[2012,2022,'2012-2022'],[2023,2099,'2023 en adelante']]},
+ {marca:'Volkswagen',modelo:'Amarok',re:/\bamarok\b/,gens:[[2010,2023,'2010-2023'],[2024,2099,'2024 en adelante']]},
+ {marca:'Chevrolet',modelo:'S10',re:/\bs\s?-?10\b/,gens:[[1995,2011,'1995-2011'],[2012,2099,'2012 en adelante']]},
+ {marca:'Nissan',modelo:'Frontier',re:/\bfrontier\b|\bnp\s?-?300\b/,gens:[[2008,2015,'2008-2015'],[2016,2099,'2016 en adelante (NP300)']]},
+ {marca:'Jeep',modelo:'Wrangler',re:/\bwrangler\b|\bjk\b|\bjl\b|\btj\b/,gens:[[1997,2006,'TJ 1997-2006'],[2007,2018,'JK 2007-2018'],[2018,2099,'JL 2018 en adelante']]},
+ {marca:'Jeep',modelo:'Gladiator',re:/\bgladiator\b|\bjt\b/,gens:[[2020,2099,'JT 2020 en adelante']]},
+ {marca:'Ram',modelo:'1500',re:/\b(ram|dodge)\b(?![^|]*\b(2500|rampage|dakota)\b)|\b1500\b(?=[^|]*\b(ram|dodge)\b)/,gens:[[2009,2018,'2009-2018'],[2019,2099,'2019 en adelante']]},
+ {marca:'Ram',modelo:'2500',re:/\b(ram|dodge)\b[^|]*\b2500\b|\b2500\b[^|]*\b(ram|dodge)\b/,gens:[[2010,2099,'2010 en adelante']]},
+ {marca:'Ram',modelo:'Rampage',re:/\brampage\b/,gens:[[2024,2099,'2024 en adelante']]}
+];
+const OTHER_VEH=/\b(toyota|ford|fiat|vw|volkswagen|chevrolet|chevy|renault|peugeot|citroen|nissan|mitsubishi|jeep|dodge|ram|honda|hyundai|kia|mercedes|m\.?\s?benz|isuzu|suzuki|audi|bmw|land\s?rover|ducato|kangoo|partner|berlingo|cronos|ecosport|ecosport|duster|oroch|toro|titano|maverick|f-?150|f-?100|l200|triton|saveiro|strada|gol|polo|tiguan|corolla|etios|yaris|onix|cruze|tracker|trailblazer|silverado|alaskan|d-?max|bronco|territory|kuga|focus|fiesta|ka|208|2008|3008|partner|sandero|logan|kwid|clio|qubo|fiorino|argo|mobi|uno|palio|siena|punto|vito|sprinter|transit|master|daily|hilux|ranger|amarok|s10|frontier|wrangler|gladiator|sw4)\b/;
+const CATS=[
+ ['Bumpers y defensas',/bumper|paragolpe|defensa|\blmb\b|portafaro|rejilla|burrera|punteras?/],
+ ['Suspensión y lift kits',/suspension|amortiguador|\blift\b|suplemento|levante|espiral|elastico|grillete|gemelo|shackle|rotula|barra panhard|bujes?|kit de altura|body\b|vejiga|air spring|coilover|barra estabiliz/],
+ ['Protecciones y chapones',/chapon|protector|cubre ?carter|proteccion|skid|blindaje/],
+ ['Estribos y rocksliders',/estribo|rockslider|pisadera|zocalo|side ?step/],
+ ['Jaulas, racks y barras',/jaula|\brack\b|antivuelco|roll ?bar|sport ?bar|\barco\b|\blanza\b|portaequipaje|barras? (de )?techo|barras? porta|canasto|porta ?escalera|portaobjeto/],
+ ['Caja de carga',/cupula|\btapa\b|\blona\b|persiana|canopy|cobertor|cobertrax|bandeja|cajon|decked|smartcap|\bbaul|\btray\b|cubre caja|tri-?cuerpo|trifold/],
+ ['Snorkel y tomas de aire',/snorkel|toma de aire/],
+ ['Iluminación',/\bled\b|\bfaro|optica|barra de luz|\bluz\b|luces|antiniebla|lightbar/],
+ ['Enganches',/enganche|\bbocha|perno|\btiro\b/],
+ ['Llantas, cubiertas y separadores',/llanta|cubierta|neumatico|separador|tuerca|beadlock|\brin\b/],
+ ['Fenders y carrocería',/fender|guardabarro|parrilla|deflector|moldura|cubre ?rueda|spoiler|cubre zocalo|manija|espejo/],
+ ['Recuperación, inflado y camping',/malacate|winch|eslinga|hi-?lift|crique|plancha|desatasco|carpa|toldo|compresor|manometro|inflador|pala\b|kit de rescate|bolso/],
+ ['Diferencial y transmisión',/diferencial|pinion|pinon|corona|\beje\b|lock\b|\bdana\b|yoke|overhaul|engranaje|axle/],
+ ['Motor y performance',/escape|exhaust|cat-?back|downpipe|reprogramacion|stage|chip|pedal drive|filtro|intercooler|turbo|admision/],
+ ['Interior',/funda|mariposero|cubre alfombra|alfombra|asiento|consola|organizador|volante/]
+];
+const nrm=s=>(s||'').toString().normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+const y2=d=>{d=+d;return d<=40?2000+d:1900+d};
+const okY=y=>y>=1990&&y<=2030;
+function parseYears(t){
+  const R=[];let s=' '+t+' ';
+  const take=(re,fn)=>{s=s.replace(re,(...m)=>{const r=fn(m);if(r&&okY(r[0])&&(r[1]===2099||okY(r[1]))&&r[0]<=r[1]){R.push(r);return ' # '}return m[0]})};
+  const UNIT='(?!\\s?(?:v\\b|cm|mm|kg|lb|w\\b|"|pulg|mts?\\b|%|psi|x\\d|lts?\\b|cc\\b|rpm|amp|ah\\b|w\\b))';
+  take(new RegExp('(?<![\\d.,])((?:19|20)\\d\\d)\\s?(?:-|/|al|a|hasta)\\s?((?:19|20)\\d\\d)(?!\\d|[.,]\\d)','g'),m=>[+m[1],+m[2]]);
+  take(new RegExp('(?<![\\d.,])((?:19|20)\\d\\d)\\s?(?:-|/|al|a)\\s?(\\d\\d)(?!\\d|[.,]\\d)'+UNIT,'g'),m=>[+m[1],y2(m[2])]);
+  take(/(?:desde|a partir de)\s?(?:el\s)?((?:19|20)\d\d)/g,m=>[+m[1],2099]);
+  take(/((?:19|20)\d\d)\s?(?:en adelante|\+|>)/g,m=>[+m[1],2099]);
+  take(new RegExp('(?<![\\d.,/\\w])(\\d\\d)\\s?(?:-|/|al|a)\\s?(\\d\\d)(?!\\d|[.,]\\d)'+UNIT,'g'),m=>{const a=+m[1],b=+m[2];const v=x=>(x>=90||x<=30);if(!v(a)||!v(b))return null;const A=y2(a),B=y2(b);return B-A<=30?[A,B]:null});
+  take(/(?<![\d.,/\w])(\d\d)\s?(?:\+|en adelante)/g,m=>{const a=+m[1];return(a>=90||a<=30)?[y2(a),2099]:null});
+  take(/hasta\s(?:[a-z]+\s)?((?:19|20)\d\d)/g,m=>[1990,+m[1]]);
+  take(new RegExp('(?<![\\d.,])((?:19|20)\\d\\d)(?!\\d|[.,]\\d)'+UNIT,'g'),m=>[+m[1],+m[1]]);
+  const up=R.filter(r=>r[0]===1990),open=R.filter(r=>r[1]===2099);
+  if(up.length&&open.length){const a=Math.max(...open.map(r=>r[0])),b=Math.min(...up.map(r=>r[1]));if(a<=b)return R.filter(r=>r[0]!==1990&&r[1]!==2099).concat([[a,b]])}
+  return R;
+}
+function tagItem(text){
+  const t=nrm(text).replace(/\s+/g,' ');
+  const models=[];VEH.forEach((v,i)=>{if(v.re.test(t))models.push(i)});
+  const years=models.length?parseYears(t):[];
+  let cat='Otros';for(const [c,re] of CATS){if(re.test(t)){cat=c;break}}
+  const universal=!models.length&&(/universal/.test(t)||!OTHER_VEH.test(t));
+  return {models,years,cat,universal};
+}
+function fitsYear(tag,y){return !tag.years.length||tag.years.some(([a,b])=>y>=a&&y<=b)}
+function genOf(mi,y){const g=VEH[mi].gens.filter(([a,b])=>y>=a&&y<=b).map(g=>g[2]);return g.join(' / ')}
+
+
 const $=id=>document.getElementById(id);
 const money=(n,m)=>n==null?'':(m==='USD'?'US$ '+n.toLocaleString('es-AR',{maximumFractionDigits:2}):'$'+Math.round(n).toLocaleString('es-AR'));
 const days=d=>d?Math.floor((Date.now()-new Date(d+'T12:00:00'))/864e5):null;
@@ -123,7 +205,7 @@ function build(docs){
   items=[];
   for(const p of provs){
     const base=(p.fuente||'').replace(/\/$/,'');
-    for(const it of (p.items||[])) items.push({...it,mon:it.mon||p.moneda||'ARS',prov:p.nombre,pid:p.id,fecha:p.actualizado,link:it.u?(it.u.startsWith('http')?it.u:base+it.u):p.fuente,key:norm([it.n,it.v,it.s,p.nombre].join(' '))});
+    for(const it of (p.items||[])) items.push({...it,mon:it.mon||p.moneda||'ARS',prov:p.nombre,pid:p.id,fecha:p.actualizado,link:it.u?(it.u.startsWith('http')?it.u:base+it.u):p.fuente,key:norm([it.n,it.v,it.s,p.nombre].join(' ')),tag:tagItem([it.n,it.v].join(' | '))});
   }
   const sel=$('fprov'),cur=sel.value;
   sel.innerHTML='<option value="">Todos los proveedores</option>'+provs.filter(p=>(p.items||[]).length).map(p=>'<option value="'+esc(p.id)+'">'+esc(p.nombre)+'</option>').join('');
@@ -133,7 +215,7 @@ function build(docs){
   $('s-prod').textContent=items.length.toLocaleString('es-AR');
   $('s-prov').textContent=provs.filter(p=>(p.items||[]).length).length;
   $('s-old').textContent=provs.filter(p=>!(p.items||[]).length&&p.tipo==='lista').length;
-  renderRows();renderProvs();
+  renderRows();renderProvs();renderVeh();
 }
 
 function renderRows(){
@@ -189,11 +271,48 @@ function renderProvs(){
   $('provs-none').innerHTML=none.map(p=>card(p,'none')).join('')||'<div class="empty">Ninguno.</div>';
 }
 
-function tab(v){for(const k of['productos','proveedores']){$('tab-'+k).setAttribute('aria-selected',k===v);$('v-'+k).hidden=k!==v}}
-$('tab-productos').onclick=()=>tab('productos');$('tab-proveedores').onclick=()=>tab('proveedores');
+
+const fmtYears=t=>t.years.length?t.years.map(([a,b])=>a===b?a:(b===2099?a+' en adelante':(a===1990?'hasta '+b:a+'-'+b))).join(', '):'';
+function initVeh(){
+  const marcas=[...new Set(VEH.map(v=>v.marca))];
+  $('vmarca').innerHTML=marcas.map(m=>'<option>'+m+'</option>').join('');
+  const now=new Date().getFullYear()+1;let o='';for(let y=now;y>=1996;y--)o+='<option>'+y+'</option>';$('vanio').innerHTML=o;
+  $('vmarca').value='Toyota';fillModels();$('vanio').value='2020';
+}
+function fillModels(){const m=$('vmarca').value;$('vmodelo').innerHTML=VEH.map((v,i)=>v.marca===m?'<option value="'+i+'">'+v.modelo+'</option>':'').join('')}
+function vrow(it){
+  const [c,t]=age(it.fecha);
+  const stock=it.k==null?'<span class="chip info">s/d</span>':it.k>0?'<span class="chip ok">'+it.k+' u.</span>':'<span class="chip bad">Sin stock</span>';
+  const yrs=it.tag.models.length?(it.tag.years.length?'<span class="sub">Años: '+fmtYears(it.tag)+'</span>':'<span class="chip warn">Sin año · confirmar</span>'):'';
+  return '<tr><td><div class="pname">'+esc(it.n)+'</div><div class="sub">'+esc([it.v,it.s?'Cód. '+it.s:''].filter(Boolean).join(' · '))+'</div>'+yrs+'</td>'+
+    '<td>'+esc(it.prov)+'<div class="sub"><span class="chip '+c+'">'+t+'</span></div></td>'+
+    '<td class="num"><b>'+money(it.p,it.mon)+'</b></td><td class="num">'+money(it.t,it.mon)+'</td><td>'+stock+'</td>'+
+    '<td>'+(it.link?'<a class="go" href="'+esc(it.link)+'" target="_blank" rel="noopener">Ver ↗</a>':'')+'</td></tr>';
+}
+function renderVeh(){
+  if(!$('vmarca').options.length)initVeh();
+  const mi=+$('vmodelo').value,y=+$('vanio').value,st=$('vstock').checked,sa=$('vsinanio').checked,un=$('vuniv').checked,v=VEH[mi];
+  let r=items.filter(it=>it.tag.models.includes(mi)&&fitsYear(it.tag,y)&&(sa||it.tag.years.length)&&(!st||(it.k??1)>0));
+  const uni=un?items.filter(it=>it.tag.universal&&(!st||(it.k??1)>0)):[];
+  const provsN=new Set(r.map(it=>it.pid)).size,sinA=r.filter(it=>!it.tag.years.length).length;
+  $('vsum').innerHTML='<b>'+esc(v.marca+' '+v.modelo+' '+y)+'</b><br>Generación '+esc(genOf(mi,y)||'fuera de catálogo')+' · '+r.length+' productos de '+provsN+' proveedores'+(sinA?' · '+sinA+' sin año (confirmar)':'');
+  const byCat={};for(const it of r)(byCat[it.tag.cat]=byCat[it.tag.cat]||[]).push(it);
+  const order=CATS.map(c=>c[0]).concat(['Otros']);
+  const sorter=(a,b)=>((a.mon==='USD')-(b.mon==='USD'))||a.p-b.p;
+  const head='<thead><tr><th>Producto</th><th>Proveedor</th><th class="num">Precio</th><th class="num">Otro precio</th><th>Stock</th><th></th></tr></thead>';
+  let html=order.filter(c=>byCat[c]).map(c=>{const l=byCat[c].sort(sorter);const ars=l.filter(x=>x.mon!=='USD');
+    return '<details class="grp"><summary><span class="gh">'+esc(c)+'</span><span class="catcount">'+l.length+(ars.length?' · desde '+money(ars[0].p,'ARS'):'')+'</span></summary><div class="tablebox"><table>'+head+'<tbody>'+l.map(vrow).join('')+'</tbody></table></div></details>'}).join('');
+  if(un){const l=uni.sort(sorter).slice(0,300);html+='<details class="grp"><summary><span class="gh">Universales</span><span class="catcount">'+uni.length+(uni.length>300?' · se muestran 300':'')+'</span></summary><div class="tablebox"><table>'+head+'<tbody>'+l.map(vrow).join('')+'</tbody></table></div></details>'}
+  $('vgroups').innerHTML=html||'<div class="empty">No hay productos cargados para este vehículo y año.</div>';
+}
+
+function tab(v){for(const k of['productos','vehiculo','proveedores']){$('tab-'+k).setAttribute('aria-selected',k===v);$('v-'+k).hidden=k!==v}}
+$('tab-productos').onclick=()=>tab('productos');$('tab-proveedores').onclick=()=>tab('proveedores');$('tab-vehiculo').onclick=()=>tab('vehiculo');
 let t;$('q').addEventListener('input',()=>{clearTimeout(t);t=setTimeout(renderRows,120)});
 for(const id of['fprov','fmon','orden','stock'])$(id).addEventListener('change',renderRows);
 $('pstate').addEventListener('change',renderProvs);
+$('vmarca').addEventListener('change',()=>{fillModels();renderVeh()});
+for(const id of['vmodelo','vanio','vstock','vsinanio','vuniv'])$(id).addEventListener('change',renderVeh);
 
 (async()=>{
   const db=await claude.use("db");
